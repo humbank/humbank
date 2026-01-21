@@ -41,16 +41,15 @@ fun App(navigator: Navigator) {
             Language.entries.first { it.iso == languageIso }
         }
 
-        val toggleLanguage: (Boolean) -> Unit = { isEnglish ->
-            languageIso = if (isEnglish) Language.English.iso else Language.German.iso
-        }
-
-
         when (val screen = navigator.current) {
 
             Screen.Home -> HomeScreen(
                 language = selectedLanguage,
-                onLanguageChange = toggleLanguage,
+                onLanguageChange = {
+                    languageIso = if (it) Language.English.iso
+                    else Language.German.iso
+                    localization.applyLanguage(languageIso)
+                                   },
 
                 onUserSelected = { username ->
                     navigator.push(Screen.UserProfile(username))
@@ -62,7 +61,11 @@ fun App(navigator: Navigator) {
 
             is Screen.UserProfile -> UserProfileScreen(
                 language = selectedLanguage,
-                onLanguageChange = toggleLanguage,
+                onLanguageChange = {
+                    languageIso = if (it) Language.English.iso
+                    else Language.German.iso
+                    localization.applyLanguage(languageIso)
+                },
 
                 username = screen.username,
                 onBack = { navigator.pop() }
@@ -70,7 +73,11 @@ fun App(navigator: Navigator) {
 
             Screen.Settings -> SettingsScreen(
                 language = selectedLanguage,
-                onLanguageChange = toggleLanguage,
+                onLanguageChange = {
+                    languageIso = if (it) Language.English.iso
+                    else Language.German.iso
+                    localization.applyLanguage(languageIso)
+                },
 
                 onBack = { navigator.pop() }
             )
