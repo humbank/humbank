@@ -14,36 +14,67 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import dev.burnoo.compose.remembersetting.rememberStringSetting
 import org.jetbrains.compose.resources.painterResource
 
 import humbank.composeapp.generated.resources.Res
 import humbank.composeapp.generated.resources.compose_multiplatform
+import org.koin.compose.koinInject
+import org.scrobotic.humbank.domain.Language
+import org.scrobotic.humbank.domain.Localization
+import org.scrobotic.humbank.screens.HomeScreen
+import org.scrobotic.humbank.screens.Navigator
+import org.scrobotic.humbank.screens.Screen
+import org.scrobotic.humbank.screens.SettingsScreen
+import org.scrobotic.humbank.screens.UserProfileScreen
 
 @Composable
 @Preview
-fun App() {
+fun App(navigator: Navigator) {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
+        val localization = koinInject<Localization>()
+        var languageIso by rememberStringSetting(
+            key = "savedLanguageIso",
+            defaultValue = Language.German.iso
+        )
+        val selectedLanguage by derivedStateOf {
+            Language.entries.first { it.iso == languageIso }
         }
+
+        val toggleLanguage: (Boolean) -> Unit = { isEnglish ->
+            languageIso = if (isEnglish) Language.English.iso else Language.German.iso
+        }
+
+
+        when (val screen = navigator.current) {
+
+            Screen.Home -> HomeScreen(
+                language = selectedLanguage,
+                onLanguageChange = toggleLanguage,
+
+                onUserSelected = { username ->
+                    navigator.push(Screen.UserProfile(username))
+                },
+                onSettingsClicked = {
+                    navigator.push(Screen.Settings)
+                }
+            )
+
+            is Screen.UserProfile -> UserProfileScreen(
+                language = selectedLanguage,
+                onLanguageChange = toggleLanguage,
+
+                username = screen.username,
+                onBack = { navigator.pop() }
+            )
+
+            Screen.Settings -> SettingsScreen(
+                language = selectedLanguage,
+                onLanguageChange = toggleLanguage,
+
+                onBack = { navigator.pop() }
+            )
+        }
+
     }
 }

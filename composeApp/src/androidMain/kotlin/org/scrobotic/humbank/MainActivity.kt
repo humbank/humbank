@@ -5,15 +5,32 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import org.koin.android.ext.koin.androidContext
+import org.scrobotic.humbank.domain.initializeKoin
+import org.scrobotic.humbank.screens.Navigator
+import androidx.activity.compose.BackHandler
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        initializeKoin(
+            config = { androidContext(this@MainActivity) }
+        )
 
         setContent {
-            App()
+            val navigator = remember { Navigator() }
+
+            BackHandler {
+                val handled = navigator.pop()
+                if (!handled) {
+                    // Let Android close the app (root screen)
+                }
+            }
+
+            App(navigator = navigator)
         }
     }
 }
@@ -21,5 +38,6 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+    val navigator = remember { Navigator() }
+    App(navigator = navigator)
 }

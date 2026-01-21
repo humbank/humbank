@@ -1,0 +1,5 @@
+<resources>
+    <string name="selected_language">Gewählte Sprache</string>
+    <string name="settings_button_lable">Einstellungen</string>
+    <string name="greeting">Hurensohn :D</string>
+</resources>
