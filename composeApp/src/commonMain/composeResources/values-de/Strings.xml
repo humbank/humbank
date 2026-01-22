@@ -1,6 +1,7 @@
 <resources>
     <string name="home_title">Zuhause</string>
-    <string name="wallet_title">Geldbeutel</string>
+    <string name="settings_title">Einstellungen</string>
     <string name="notifications_title">Benachrichtigungen</string>
     <string name="account_title">Profil</string>
+    <string name="change_language">Sprache ändern</string>
 </resources>
