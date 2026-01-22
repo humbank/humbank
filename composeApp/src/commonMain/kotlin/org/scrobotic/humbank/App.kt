@@ -37,6 +37,9 @@ fun App(navigator: Navigator) {
             key = "savedLanguageIso",
             defaultValue = Language.German.iso
         )
+
+        localization.applyLanguage(languageIso)
+
         val selectedLanguage by derivedStateOf {
             Language.entries.first { it.iso == languageIso }
         }
