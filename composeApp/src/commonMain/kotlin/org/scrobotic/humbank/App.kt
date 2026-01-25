@@ -6,6 +6,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import dev.burnoo.compose.remembersetting.rememberStringSetting
 
 import org.koin.compose.koinInject
+import org.scrobotic.humbank.data.Account
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.domain.Localization
 import org.scrobotic.humbank.screens.home.HomeScreen
@@ -19,6 +20,7 @@ import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
 @Composable
 @Preview
 fun App(navigator: Navigator) {
+
 
     HumbankUITheme {
         val localization = koinInject<Localization>()
@@ -42,10 +44,17 @@ fun App(navigator: Navigator) {
                 onNotificationsClicked = {},
                 onAccountClicked = {}
             )
-        }){
+        }){ innerPadding ->
             when (val screen = navigator.current) {
 
                 Screen.Home -> HomeScreen(
+                    contentPadding = innerPadding,
+                    account = Account(
+                        account_id = "scrobotic",
+                        full_name = "Cornelius Binder",
+                        pin = "1234",
+                        balance = 9924.80
+                    ),
                     onNavigateToTransfer = {  },
                     onNavigateToProfile ={}
                 )
