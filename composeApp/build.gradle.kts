@@ -46,6 +46,8 @@ kotlin {
             implementation(libs.koin.compose)
 
             implementation(libs.remember.settings)
+
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

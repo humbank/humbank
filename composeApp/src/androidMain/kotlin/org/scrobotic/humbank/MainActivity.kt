@@ -11,14 +11,18 @@ import org.koin.android.ext.koin.androidContext
 import org.scrobotic.humbank.domain.initializeKoin
 import org.scrobotic.humbank.screens.Navigator
 import androidx.activity.compose.BackHandler
+import org.koin.core.context.GlobalContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        initializeKoin(
-            config = { androidContext(this@MainActivity) }
-        )
+        if (GlobalContext.getOrNull() == null) {
+
+            initializeKoin(
+                config = { androidContext(this@MainActivity) }
+            )
+        }
 
         setContent {
             val navigator = remember { Navigator() }

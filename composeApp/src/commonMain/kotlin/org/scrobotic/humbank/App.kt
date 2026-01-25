@@ -1,6 +1,5 @@
 package org.scrobotic.humbank
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,7 +37,7 @@ fun App(navigator: Navigator) {
 
         Scaffold(bottomBar= {
             BottomNavigationBar(
-                onHomeClicked = {navigator.push(Screen.Home)},
+               onHomeClicked = {navigator.replace(Screen.Home)},
                 onSettingsClicked = {navigator.push(Screen.Settings)},
                 onNotificationsClicked = {},
                 onAccountClicked = {}
@@ -47,10 +46,8 @@ fun App(navigator: Navigator) {
             when (val screen = navigator.current) {
 
                 Screen.Home -> HomeScreen(
-                    language = selectedLanguage,
-                    onSettingsClicked = {
-                        navigator.push(Screen.Settings)
-                    }
+                    onNavigateToTransfer = {  },
+                    onNavigateToProfile ={}
                 )
 
                 is Screen.UserProfile -> UserProfileScreen(
@@ -68,7 +65,6 @@ fun App(navigator: Navigator) {
                 Screen.Settings -> SettingsScreen(
                     language = selectedLanguage,
                     onLanguageChange = { selectedLanguage ->
-                        // "selectedLanguage" is now English or German, not true or false
                         languageIso = selectedLanguage.iso
                         localization.applyLanguage(languageIso)
                     },

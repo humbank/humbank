@@ -22,11 +22,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.dashboard_title
+import humbank.composeapp.generated.resources.greeting
+import org.jetbrains.compose.resources.stringResource
+import org.scrobotic.humbank.data.formatCurrency
 import org.scrobotic.humbank.ui.elements.icons.processed.Search
 
 @Preview
 @Composable
 fun WalletSection() {
+
+
+    val name = "Cornelius Binder"
+    val raw_balance: Double = 44475.00
+    val balance: String = raw_balance.formatCurrency()
+
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -37,17 +49,35 @@ fun WalletSection() {
 
         Column {
             Text(
-                text = "Cornelius Binder",
+                text= stringResource(Res.string.dashboard_title),
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "${stringResource(Res.string.greeting)}$name",
                 fontSize = 17.sp,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "$ 44.475",
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(25.dp))
+                    .background(MaterialTheme.colorScheme.onPrimary)
+                    .clickable {}
+                    .padding(vertical = 12.dp, horizontal = 16.dp)
+            ) {Text(
+                text = "$ $balance",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
-            )
+            )}
+
+
+
         }
 
         Box(
@@ -63,6 +93,9 @@ fun WalletSection() {
                 tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
+
+        //RunningBalanceChart()
+
 
     }
 }

@@ -4,4 +4,11 @@
     <string name="notifications_title">Benachrichtigungen</string>
     <string name="account_title">Profil</string>
     <string name="change_language">Sprache ändern</string>
+    <string name="greeting">Willkommen zurück, </string>
+    <string name="dashboard_title">Banking-Dashboard</string>
+    <string name="incomes">Einnahmen</string>
+    <string name="expenses">Ausgaben</string>
+    <string name="running_chart_title">Laufender Kontostand</string>
+    <string name="last_transactions_title">Letzte Transaktionen</string>
+    <string name="balance_title">Kontostand</string>
 </resources>
