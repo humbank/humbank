@@ -31,8 +31,9 @@ import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.Account
 import org.scrobotic.humbank.data.generateRandomId
 import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun TransactionInputPopup(
     account: Account,
@@ -113,8 +114,8 @@ fun TransactionInputPopup(
             Button(
                 onClick = {
                     val amt = amount.toDoubleOrNull() ?: 0.0
-                    if (amt > 0 && receiver.isNotBlank() && sender.isNotBlank() && (sender == account.account_id || receiver == account.account_id)) {
-                        if (sender == account.account_id) {
+                    if (amt > 0 && receiver.isNotBlank() && sender.isNotBlank() && (sender == account.username || receiver == account.username)) {
+                        if (sender == account.username) {
                             val newTx = Transaction(
                                 id = "tx_${generateRandomId()}", // Generate temp ID
                                 sender = sender, // Your ID

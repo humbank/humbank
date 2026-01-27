@@ -1,16 +1,16 @@
 package org.scrobotic.humbank
 
+import DriverFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.tooling.preview.Preview
 import org.koin.android.ext.koin.androidContext
 import org.scrobotic.humbank.domain.initializeKoin
 import org.scrobotic.humbank.screens.Navigator
 import androidx.activity.compose.BackHandler
+import createDatabase
 import org.koin.core.context.GlobalContext
 
 class MainActivity : ComponentActivity() {
@@ -26,6 +26,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navigator = remember { Navigator() }
+            val driverFactory = DriverFactory(context= applicationContext)
+            val database = createDatabase(driverFactory)
 
             BackHandler {
                 val handled = navigator.pop()
@@ -34,14 +36,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            App(navigator = navigator)
+            App(navigator = navigator, database = database)
         }
     }
 }
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    val navigator = remember { Navigator() }
-    App(navigator = navigator)
-}
+//
+//@Preview
+//@Composable
+//fun AppAndroidPreview() {
+//    val navigator = remember { Navigator() }
+//    val driverFactory = DriverFactory(context = a)
+//    val database = createDatabase(driverFactory)
+//    App(navigator = navigator, database = data)
+//}

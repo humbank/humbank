@@ -1,10 +1,11 @@
 package org.scrobotic.humbank.data
 
 
+import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 
-data class Transaction(
+data class Transaction @OptIn(ExperimentalTime::class) constructor(
     val id: String,
     val sender: String,
     val receiver: String,
@@ -16,9 +17,8 @@ data class Transaction(
 )
 
 data class Account(
-    val account_id: String,
+    val username: String,
     val full_name: String,
-    val pin: String,
-    val balance: Double
+    val balance: Double,
+    val role: String
 )
-

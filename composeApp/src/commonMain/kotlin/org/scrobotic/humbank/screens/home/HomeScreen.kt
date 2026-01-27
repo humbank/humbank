@@ -35,19 +35,22 @@ import org.scrobotic.humbank.screens.home.components.TransactionRow
 import org.scrobotic.humbank.ui.elements.icons.processed.Send
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.scrobotic.humbank.AccountRepository
 import org.scrobotic.humbank.data.generateRandomId
+import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun HomeScreen(
     contentPadding: PaddingValues,
     account: Account,
     onNavigateToTransfer: () -> Unit,
-    onNavigateToProfile: (String) -> Unit
+    onNavigateToProfile: (String) -> Unit,
+    repo: AccountRepository
 ) {
-    val accountId = account.account_id
+    val accountId = account.username
     var balance by remember { mutableStateOf(account.balance) }
 
     var sel_tx by remember { mutableStateOf<Transaction?>(null) }
@@ -280,15 +283,25 @@ fun HomeScreen(
     }
 
     if (showInputPopup) {
-        TransactionInputPopup(
-            account = account,
-            onDismiss = { showInputPopup = false },
-            onTransactionCreated = { newTx ->
-                // Add to the START of the list (index 0) so it appears at the top
-                transactions.add(0, newTx)
-            }
-        )
+        repo.syncAccounts(listOf(
+            Account(
+                username = "scrobotic",
+                full_name = "Cornelius Binder",
+                balance = 2100.67,
+                role = "Admin"
+            )
+        ))
+        showInputPopup = false
     }
+//        TransactionInputPopup(
+//            account = account,
+//            onDismiss = { showInputPopup = false },
+//            onTransactionCreated = { newTx ->
+//                // Add to the START of the list (index 0) so it appears at the top
+//
+//            }
+//        )
+//    }
 }
 
 

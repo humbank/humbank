@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -31,6 +32,8 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String, currentBal: Doub
         color = Color.Gray,
         fontSize = 10.sp
     )
+
+    val gridColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
 
     Column(
         modifier = Modifier
@@ -79,6 +82,8 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String, currentBal: Doub
             val displayMin = min - (range * 0.15f)
             val displayRange = displayMax - displayMin
 
+
+
             // horztnknak fgrid line
             val ySteps = 4
             for (i in 0..ySteps) {
@@ -87,7 +92,7 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String, currentBal: Doub
 
                 // Grid line
                 drawLine(
-                    color = Color.White.copy(alpha = 0.1f),
+                    color = gridColor,
                     start = Offset(0f, y),
                     end = Offset(size.width, y),
                     strokeWidth = 1.dp.toPx()
@@ -110,7 +115,7 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String, currentBal: Doub
 
                 // Vertical grid line
                 drawLine(
-                    color = Color.White.copy(alpha = 0.05f),
+                    color = gridColor,
                     start = Offset(x, 0f),
                     end = Offset(x, size.height),
                     strokeWidth = 1.dp.toPx()

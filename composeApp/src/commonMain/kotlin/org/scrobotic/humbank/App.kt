@@ -19,7 +19,8 @@ import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
 
 @Composable
 @Preview
-fun App(navigator: Navigator) {
+fun App(navigator: Navigator, database: Database) {
+    val repo = AccountRepository(database)
 
 
     HumbankUITheme {
@@ -42,7 +43,7 @@ fun App(navigator: Navigator) {
                onHomeClicked = {navigator.replace(Screen.Home)},
                 onSettingsClicked = {navigator.push(Screen.Settings)},
                 onNotificationsClicked = {},
-                onAccountClicked = {}
+                onAccountClicked = { navigator.push(Screen.UserProfile) }
             )
         }){ innerPadding ->
             when (val screen = navigator.current) {
@@ -50,25 +51,20 @@ fun App(navigator: Navigator) {
                 Screen.Home -> HomeScreen(
                     contentPadding = innerPadding,
                     account = Account(
-                        account_id = "scrobotic",
+                        username = "scrobotic",
                         full_name = "Cornelius Binder",
-                        pin = "1234",
-                        balance = 9924.80
+                        balance = 9924.80,
+                        role = "Admin"
                     ),
                     onNavigateToTransfer = {  },
-                    onNavigateToProfile ={}
+                    onNavigateToProfile ={  },
+                    repo = repo
                 )
 
                 is Screen.UserProfile -> UserProfileScreen(
                     language = selectedLanguage,
-                    onLanguageChange = {
-                        languageIso = if (it) Language.English.iso
-                        else Language.German.iso
-                        localization.applyLanguage(languageIso)
-                    },
-
-                    username = screen.username,
-                    onBack = { navigator.pop() }
+                    onBack = { navigator.pop() },
+                    account = repo.getAccount("scrobotic")
                 )
 
                 Screen.Settings -> SettingsScreen(

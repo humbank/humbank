@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization")
+    id("app.cash.sqldelight") version "2.2.1"
 }
 
 kotlin {
@@ -31,6 +32,8 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
+            implementation("app.cash.sqldelight:android-driver:2.2.1")
+
             implementation(libs.koin.android)
         }
         commonMain.dependencies {
@@ -50,6 +53,9 @@ kotlin {
 
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+        }
+        nativeMain.dependencies{
+            implementation("app.cash.sqldelight:native-driver:2.2.1")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -88,3 +94,10 @@ dependencies {
     debugImplementation(compose.uiTooling)
 }
 
+sqldelight {
+    databases {
+        create("Database") {
+            packageName.set("org.scrobotic.humbank")
+        }
+    }
+}

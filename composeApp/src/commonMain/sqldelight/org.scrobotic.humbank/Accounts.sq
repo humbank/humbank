@@ -1,0 +1,17 @@
+CREATE TABLE accounts (
+  username TEXT NOT NULL PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  balance REAL NOT NULL DEFAULT 0.0,
+  role TEXT NOT NULL
+);
+insertAccount:
+INSERT OR REPLACE INTO
+accounts(username, full_name, balance, role)
+VALUES (?,?,?,?);
+
+
+selectAllAccounts:
+SELECT * FROM accounts;
+
+selectAccountByUsername:
+SELECT * FROM accounts WHERE username = ?;
