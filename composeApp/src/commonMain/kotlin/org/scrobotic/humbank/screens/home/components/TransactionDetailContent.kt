@@ -27,14 +27,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.formatCurrency
 import org.scrobotic.humbank.ui.Blue
-import org.scrobotic.humbank.ui.Gray
 import org.scrobotic.humbank.ui.GreenStart
 import org.scrobotic.humbank.ui.Pink40
-import org.scrobotic.humbank.ui.Pink80
 import org.scrobotic.humbank.ui.elements.icons.processed.ReceiptLong
 
 @Composable
-fun TransactionDetailContent(accountId: String, transaction: Transaction, onClose: () -> Unit) {
+fun TransactionDetailContent(accountId: String?, transaction: Transaction, onClose: () -> Unit) {
     val isIncoming = transaction.receiver == accountId
     Column(
         modifier = Modifier

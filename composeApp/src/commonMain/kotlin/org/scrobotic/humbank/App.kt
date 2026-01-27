@@ -21,6 +21,7 @@ import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
 @Preview
 fun App(navigator: Navigator, database: Database) {
     val repo = AccountRepository(database)
+    val account = repo.getAccount("scrobotic")
 
 
     HumbankUITheme {
@@ -50,12 +51,7 @@ fun App(navigator: Navigator, database: Database) {
 
                 Screen.Home -> HomeScreen(
                     contentPadding = innerPadding,
-                    account = Account(
-                        username = "scrobotic",
-                        full_name = "Cornelius Binder",
-                        balance = 9924.80,
-                        role = "Admin"
-                    ),
+                    account = account,
                     onNavigateToTransfer = {  },
                     onNavigateToProfile ={  },
                     repo = repo

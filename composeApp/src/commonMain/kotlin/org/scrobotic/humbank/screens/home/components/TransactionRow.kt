@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -26,14 +24,13 @@ import org.scrobotic.humbank.data.formatCurrency
 import org.scrobotic.humbank.ui.Gray
 import org.scrobotic.humbank.ui.GreenStart
 import org.scrobotic.humbank.ui.Pink40
-import org.scrobotic.humbank.ui.White
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowUpward
 
 @Composable
 fun TransactionRow(
     tx: Transaction,
-    accountId: String,
+    accountId: String?,
     onClick: (Transaction) -> Unit // New parameter for click handling
 ) {
     val isIncoming = tx.receiver == accountId

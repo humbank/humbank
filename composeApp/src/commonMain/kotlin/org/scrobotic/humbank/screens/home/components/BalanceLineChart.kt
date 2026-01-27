@@ -25,7 +25,7 @@ import org.scrobotic.humbank.data.formatCurrency
 import org.scrobotic.humbank.ui.BlueStart
 
 @Composable
-fun BalanceLineChart(txs: List<Transaction>, accountId: String, currentBal: Double) {
+fun BalanceLineChart(txs: List<Transaction>, accountId: String?, currentBal: Double) {
     val textMeasurer = rememberTextMeasurer()
 
     val labelStyle = androidx.compose.ui.text.TextStyle(

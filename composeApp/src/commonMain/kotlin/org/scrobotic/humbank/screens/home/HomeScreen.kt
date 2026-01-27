@@ -30,11 +30,8 @@ import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.screens.home.components.BalanceLineChart
 import org.scrobotic.humbank.screens.home.components.InfoCard
 import org.scrobotic.humbank.screens.home.components.TransactionDetailContent
-import org.scrobotic.humbank.screens.home.components.TransactionInputPopup
 import org.scrobotic.humbank.screens.home.components.TransactionRow
 import org.scrobotic.humbank.ui.elements.icons.processed.Send
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.scrobotic.humbank.AccountRepository
 import org.scrobotic.humbank.data.generateRandomId
 import kotlin.time.ExperimentalTime
@@ -45,13 +42,13 @@ import kotlin.time.Instant
 @Composable
 fun HomeScreen(
     contentPadding: PaddingValues,
-    account: Account,
+    account: Account?,
     onNavigateToTransfer: () -> Unit,
     onNavigateToProfile: (String) -> Unit,
     repo: AccountRepository
 ) {
-    val accountId = account.username
-    var balance by remember { mutableStateOf(account.balance) }
+    val accountId = account?.username
+    var balance by remember { mutableStateOf(account?.balance ?: 0.0) }
 
     var sel_tx by remember { mutableStateOf<Transaction?>(null) }
     val sheetState = rememberModalBottomSheetState()
@@ -218,7 +215,7 @@ fun HomeScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(stringResource(Res.string.dashboard_title), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onBackground)
-                    Text("${stringResource(Res.string.greeting)}${account.full_name}", color = Gray, fontSize = 14.sp)
+                    Text("${stringResource(Res.string.greeting)}${account?.full_name}", color = Gray, fontSize = 14.sp)
                 }
                 IconButton(onClick = { showInputPopup = true }) {
                     Icon(Send, contentDescription = "Transfer", tint = Hannes_Gray)
