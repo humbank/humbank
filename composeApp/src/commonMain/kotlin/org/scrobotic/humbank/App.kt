@@ -6,7 +6,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import dev.burnoo.compose.remembersetting.rememberStringSetting
 
 import org.koin.compose.koinInject
-import org.scrobotic.humbank.data.Account
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.domain.Localization
 import org.scrobotic.humbank.screens.home.HomeScreen
@@ -14,6 +13,7 @@ import org.scrobotic.humbank.screens.Navigator
 import org.scrobotic.humbank.screens.Screen
 import org.scrobotic.humbank.screens.SettingsScreen
 import org.scrobotic.humbank.screens.UserProfileScreen
+import org.scrobotic.humbank.screens.SearchScreen
 import org.scrobotic.humbank.ui.HumbankUITheme
 import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
 
@@ -43,7 +43,7 @@ fun App(navigator: Navigator, database: Database) {
             BottomNavigationBar(
                onHomeClicked = {navigator.replace(Screen.Home)},
                 onSettingsClicked = {navigator.push(Screen.Settings)},
-                onNotificationsClicked = {},
+                onNotificationsClicked = { navigator.push(Screen.Search) },
                 onAccountClicked = { navigator.push(Screen.UserProfile) }
             )
         }){ innerPadding ->
@@ -71,6 +71,10 @@ fun App(navigator: Navigator, database: Database) {
                     },
 
                     onBack = { navigator.pop() }
+                )
+
+                Screen.Search -> SearchScreen(
+                    repository = repo
                 )
             }
         }

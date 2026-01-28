@@ -15,3 +15,6 @@ SELECT * FROM accounts;
 
 selectAccountByUsername:
 SELECT * FROM accounts WHERE username = ?;
+
+searchAccounts:
+SELECT * FROM accounts WHERE username LIKE ('%' || :query || '%') OR full_name LIKE ('%' || :query || '%');

@@ -53,6 +53,8 @@ kotlin {
 
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+            implementation("app.cash.sqldelight:coroutines-extensions:2.2.1")
         }
         nativeMain.dependencies{
             implementation("app.cash.sqldelight:native-driver:2.2.1")

@@ -6,4 +6,6 @@ sealed interface Screen {
     object UserProfile : Screen
 
     object Settings : Screen
+
+    object Search : Screen
 }

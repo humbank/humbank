@@ -17,4 +17,5 @@
     <string name="tx_receiverID">Receiver ID</string>
     <string name="tx_completed">Completed</string>
     <string name="close_btn">Close</string>
+    <string name="search_placeholder">Search usernames or names...</string>
 </resources>

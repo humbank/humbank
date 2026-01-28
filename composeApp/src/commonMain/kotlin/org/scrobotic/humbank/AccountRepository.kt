@@ -1,12 +1,18 @@
 package org.scrobotic.humbank
 
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
 import org.scrobotic.humbank.data.Account
+import orgscrobotichumbank.Accounts
 
 
 class AccountRepository(database: Database) {
     private val queries = database.accountsQueries
 
-    fun syncAccounts(accountsFromServer: List<Account>){
+    fun syncAccounts(accountsFromServer: List<Account>) {
         queries.transaction {
             accountsFromServer.forEach { account ->
                 queries.insertAccount(
@@ -30,4 +36,11 @@ class AccountRepository(database: Database) {
                     role = it.role
                 )
             }
+
+
+    fun searchAccounts(query: String):
+            Flow<List<Accounts>> {
+        return queries.searchAccounts(query).asFlow().mapToList(Dispatchers.IO)
+    }
+
 }
