@@ -26,17 +26,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.user_transaction
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.Account
-import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfileScreen(
-    account: Account?,      // Nullable now
-    language: Language,
-    onBack: () -> Unit
-) {
+fun ProfileScreen(account: Account?, onTransaction: (Account) -> Unit, onBack: () -> Unit){
     Scaffold(
         topBar = {
             TopAppBar(
@@ -85,15 +83,12 @@ fun UserProfileScreen(
 
                     Text("Name: ${account.fullName}", style = MaterialTheme.typography.titleMedium)
                     Text("Username: ${account.username}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Role: ${account.role}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Balance: $${account.balance}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Language: ${language.name}", style = MaterialTheme.typography.bodyMedium)
 
                     Button(
-                        onClick = { /* TODO: Edit profile */ },
+                        onClick = { onTransaction(account) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Edit Profile")
+                        Text(stringResource(Res.string.user_transaction))
                     }
                 }
             } else {
@@ -107,4 +102,5 @@ fun UserProfileScreen(
             }
         }
     }
+
 }

@@ -18,7 +18,7 @@ data class Transaction @OptIn(ExperimentalTime::class) constructor(
 
 data class Account(
     val username: String,
-    val full_name: String,
+    val fullName: String,
     val balance: Double,
     val role: String
 )

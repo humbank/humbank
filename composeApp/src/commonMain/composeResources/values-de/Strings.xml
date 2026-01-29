@@ -18,4 +18,5 @@
     <string name="tx_completed">Completed</string>
     <string name="close_btn">Schließen</string>
     <string name="search_placeholder">Suche nach Benutzernamen oder Namen...</string>
+    <string name="user_transaction">Sende Geld</string>
 </resources>

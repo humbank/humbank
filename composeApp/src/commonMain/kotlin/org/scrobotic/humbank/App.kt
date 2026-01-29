@@ -6,22 +6,149 @@ import androidx.compose.ui.tooling.preview.Preview
 import dev.burnoo.compose.remembersetting.rememberStringSetting
 
 import org.koin.compose.koinInject
+import org.scrobotic.humbank.data.Transaction
+import org.scrobotic.humbank.data.generateRandomId
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.domain.Localization
 import org.scrobotic.humbank.screens.home.HomeScreen
 import org.scrobotic.humbank.screens.Navigator
+import org.scrobotic.humbank.screens.ProfileScreen
 import org.scrobotic.humbank.screens.Screen
 import org.scrobotic.humbank.screens.SettingsScreen
 import org.scrobotic.humbank.screens.UserProfileScreen
 import org.scrobotic.humbank.screens.SearchScreen
+import org.scrobotic.humbank.screens.TransactionInputScreen
 import org.scrobotic.humbank.ui.HumbankUITheme
 import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+
+
+
+@OptIn(ExperimentalTime::class)
 @Composable
 @Preview
 fun App(navigator: Navigator, database: Database) {
+    val username = "scrobotic"
     val repo = AccountRepository(database)
-    val account = repo.getAccount("scrobotic")
+    val account = repo.getAccount(username)
+    val transactions = remember { mutableStateListOf<Transaction>() }
+
+
+
+    LaunchedEffect(Unit){
+        if (transactions.isEmpty()) {
+            transactions.addAll(
+                listOf(
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_777",
+                        amount = 35.50,
+                        created = Instant.parse("2022-05-10T13:25:00Z"),
+                        pureDescription = "Café Besuch",
+                        currentBalance = 3389.31 - 35.50 // 3353.81
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "acc_666",
+                        receiver = "scrobotic",
+                        amount = 80.0,
+                        created = Instant.parse("2022-05-09T09:00:00Z"),
+                        pureDescription = "Verkauf Kleidung",
+                        currentBalance = 3309.31 + 80.0 // 3389.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_555",
+                        amount = 120.0,
+                        created = Instant.parse("2022-05-08T16:35:00Z"),
+                        pureDescription = "Restaurant",
+                        currentBalance = 3429.31 - 120.0 // 3309.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "acc_444",
+                        receiver = "scrobotic",
+                        amount = 500.0,
+                        created = Instant.parse("2022-05-07T11:50:00Z"),
+                        pureDescription = "Steuererstattung",
+                        currentBalance = 2929.31 + 500.0 // 3429.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_333",
+                        amount = 60.0,
+                        created = Instant.parse("2022-05-06T20:05:00Z"),
+                        pureDescription = "Supermarkt Einkauf",
+                        currentBalance = 2989.31 - 60.0 // 2929.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "acc_222",
+                        receiver = "scrobotic",
+                        amount = 150.0,
+                        created = Instant.parse("2022-05-05T14:10:00Z"),
+                        pureDescription = "Gehalt Nebenjob",
+                        currentBalance = 2839.31 + 150.0 // 2989.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_999",
+                        amount = 19.99,
+                        created = Instant.parse("2022-05-04T18:20:00Z"),
+                        pureDescription = "Netflix Abo",
+                        currentBalance = 2859.30 - 19.99 // 2839.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_555",
+                        amount = 500.0,
+                        created = Instant.parse("2022-05-03T08:30:00Z"),
+                        pureDescription = "Rückzahlung Freund",
+                        currentBalance = 3359.30 - 500.0 // 2859.30
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_888",
+                        amount = 75.20,
+                        created = Instant.parse("2022-05-02T12:45:00Z"),
+                        pureDescription = "Tankstelle",
+                        currentBalance = 3434.50 - 75.20 // 3359.30
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_999",
+                        amount = 565.50,
+                        created = Instant.parse("2022-05-01T15:00:00Z"),
+                        pureDescription = "Miete Mai",
+                        currentBalance = 4000.00 - 565.50 // 3434.50
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "SYSTEM",
+                        receiver = "scrobotic",
+                        amount = 4000.00,
+                        created = Instant.parse("2022-05-01T09:00:00Z"),
+                        pureDescription = "Anfangssaldo & Bonus",
+                        currentBalance = 0.0 + 4000.00 // Start balance
+                    )
+
+
+
+
+
+                )
+            )
+        }
+    }
 
 
     HumbankUITheme {
@@ -52,12 +179,13 @@ fun App(navigator: Navigator, database: Database) {
                 Screen.Home -> HomeScreen(
                     contentPadding = innerPadding,
                     account = account,
+                    transactions = transactions,
                     onNavigateToTransfer = {  },
                     onNavigateToProfile ={  },
                     repo = repo
                 )
 
-                is Screen.UserProfile -> UserProfileScreen(
+                Screen.UserProfile -> UserProfileScreen(
                     language = selectedLanguage,
                     onBack = { navigator.pop() },
                     account = repo.getAccount("scrobotic")
@@ -74,7 +202,25 @@ fun App(navigator: Navigator, database: Database) {
                 )
 
                 Screen.Search -> SearchScreen(
-                    repository = repo
+                    repository = repo,
+                    onNavigateToAccount = {username ->
+                        navigator.push(Screen.Profile(username))
+                    }
+                )
+
+                is Screen.Profile -> ProfileScreen(
+                    account = repo.getAccount(screen.username),
+                    onTransaction = { account ->
+                    navigator.push(Screen.TransactionInput(account)) },
+                    onBack =  { navigator.pop() } )
+
+                is Screen.TransactionInput -> TransactionInputScreen(
+                    senderAccount = account,
+                    receiverAccount = screen.account,
+                    onNavigateBack = { navigator.pop() },
+                    onTransactionCreated = { tx ->
+                        transactions.add(tx)
+                    }
                 )
             }
         }

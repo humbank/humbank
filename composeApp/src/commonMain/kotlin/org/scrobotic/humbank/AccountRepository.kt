@@ -17,7 +17,7 @@ class AccountRepository(database: Database) {
             accountsFromServer.forEach { account ->
                 queries.insertAccount(
                     username = account.username,
-                    full_name = account.full_name,
+                    full_name = account.fullName,
                     balance = account.balance,
                     role = account.role
                 )
@@ -25,17 +25,17 @@ class AccountRepository(database: Database) {
         }
     }
 
-    fun getAccount(username: String): Account? =
+    fun getAccount(username: String): Account =
         queries.selectAccountByUsername(username)
             .executeAsOneOrNull()
             ?.let {
                 Account(
                     username = it.username,
-                    full_name = it.full_name,
+                    fullName = it.full_name,
                     balance = it.balance,
                     role = it.role
                 )
-            }
+            } ?: throw NoSuchElementException("Account not found: $username")
 
 
     fun searchAccounts(query: String):

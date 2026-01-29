@@ -1,5 +1,7 @@
 package org.scrobotic.humbank.screens
 
+import org.scrobotic.humbank.data.Account
+
 sealed interface Screen {
     object Home : Screen
 
@@ -8,4 +10,8 @@ sealed interface Screen {
     object Settings : Screen
 
     object Search : Screen
+
+    data class Profile(val username: String) : Screen
+
+    data class TransactionInput(val account: Account): Screen
 }

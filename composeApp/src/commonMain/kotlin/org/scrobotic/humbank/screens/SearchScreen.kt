@@ -36,11 +36,12 @@ import org.scrobotic.humbank.ui.elements.icons.processed.Search
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(repository: AccountRepository) {
+fun SearchScreen(repository: AccountRepository,
+                 onNavigateToAccount: (account: String) -> Unit) {
     var query by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
 
-    // This Flow updates every time 'query' changes
+
     val searchResults by repository.searchAccounts(query)
         .collectAsState(initial = emptyList())
 
@@ -62,7 +63,7 @@ fun SearchScreen(repository: AccountRepository) {
                 }
             }
         ) {
-            // This is the content shown when the search bar is ACTIVE
+
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(16.dp),
@@ -74,7 +75,7 @@ fun SearchScreen(repository: AccountRepository) {
                         supportingContent = { Text("@${account.username}") },
                         leadingContent = { Icon(Account, contentDescription = null) },
                         modifier = Modifier.clickable {
-                            // Logic for selecting an account
+                            onNavigateToAccount(account.username)
                             active = false
                         }
                     )
