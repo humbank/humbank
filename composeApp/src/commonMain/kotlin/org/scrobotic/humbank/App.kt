@@ -6,10 +6,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import dev.burnoo.compose.remembersetting.rememberStringSetting
 
 import org.koin.compose.koinInject
+import org.scrobotic.humbank.NetworkClient.ApiRepository
+import org.scrobotic.humbank.NetworkClient.ApiRepositoryImpl
+import org.scrobotic.humbank.NetworkClient.ApiServiceImpl
+import org.scrobotic.humbank.NetworkClient.createNetworkClient
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.generateRandomId
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.domain.Localization
+import org.scrobotic.humbank.screens.LoginScreen
 import org.scrobotic.humbank.screens.home.HomeScreen
 import org.scrobotic.humbank.screens.Navigator
 import org.scrobotic.humbank.screens.ProfileScreen
@@ -30,6 +35,17 @@ import kotlin.time.Instant
 @Composable
 @Preview
 fun App(navigator: Navigator, database: Database) {
+    val httpClient = createNetworkClient()
+
+    val apiService = ApiServiceImpl(
+        httpClient = httpClient,
+        baseUrl = "https://humbank.cv"
+    )
+
+    val apiRepository: ApiRepository =
+        ApiRepositoryImpl(apiService)
+
+
     val username = "scrobotic"
     val repo = AccountRepository(database)
     val account = repo.getAccount(username)
@@ -167,12 +183,14 @@ fun App(navigator: Navigator, database: Database) {
 
 
         Scaffold(bottomBar= {
-            BottomNavigationBar(
-               onHomeClicked = {navigator.replace(Screen.Home)},
-                onSettingsClicked = {navigator.push(Screen.Settings)},
-                onNotificationsClicked = { navigator.push(Screen.Search) },
-                onAccountClicked = { navigator.push(Screen.UserProfile) }
-            )
+            if (navigator.current !is Screen.Login) {
+                BottomNavigationBar(
+                    onHomeClicked = { navigator.replace(Screen.Home) },
+                    onSettingsClicked = { navigator.push(Screen.Settings) },
+                    onNotificationsClicked = { navigator.push(Screen.Search) },
+                    onAccountClicked = { navigator.push(Screen.UserProfile) }
+                )
+            }
         }){ innerPadding ->
             when (val screen = navigator.current) {
 
@@ -220,6 +238,15 @@ fun App(navigator: Navigator, database: Database) {
                     onNavigateBack = { navigator.pop() },
                     onTransactionCreated = { tx ->
                         transactions.add(tx)
+                    }
+                )
+
+                Screen.Login -> LoginScreen(
+                    onLogin = { username, password ->
+                        apiRepository.login(username, password)
+                    },
+                    onLoginSuccess = {
+                        navigator.push(Screen.Home)
                     }
                 )
             }

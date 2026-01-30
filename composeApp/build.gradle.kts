@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    kotlin("plugin.serialization")
+    kotlin("plugin.serialization") version "2.1.0"
     id("app.cash.sqldelight") version "2.2.1"
 }
 
@@ -35,6 +35,9 @@ kotlin {
             implementation("app.cash.sqldelight:android-driver:2.2.1")
 
             implementation(libs.koin.android)
+
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -55,9 +58,18 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
             implementation("app.cash.sqldelight:coroutines-extensions:2.2.1")
+
+            implementation(libs.ktor.client.core)
+            implementation("io.ktor:ktor-client-resources:3.4.0")
+            implementation("io.ktor:ktor-client-content-negotiation:3.4.0")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:3.4.0")
+            implementation("io.ktor:ktor-client-logging:3.4.0")
+
+            implementation(libs.kotlinx.coroutines.core)
         }
         nativeMain.dependencies{
             implementation("app.cash.sqldelight:native-driver:2.2.1")
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

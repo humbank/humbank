@@ -3,7 +3,7 @@ package org.scrobotic.humbank.screens
 import androidx.compose.runtime.mutableStateListOf
 
 class Navigator(
-    start: Screen = Screen.Home
+    start: Screen = Screen.Login
 ) {
     private val backStack = mutableStateListOf(start)
 
