@@ -24,11 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.scrobotic.humbank.data.UserSession
 
 @Composable
 fun LoginScreen(
-    onLogin: suspend (username: String, password: String) -> Unit,
-    onLoginSuccess: () -> Unit
+    onLogin: suspend (username: String, password: String) -> UserSession,
+    onLoginSuccess: (UserSession) -> Unit
 ){
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -88,8 +89,8 @@ fun LoginScreen(
 
                 scope.launch {
                     try {
-                        onLogin(username, password)
-                        onLoginSuccess()
+                        val session = onLogin(username, password)
+                        onLoginSuccess(session)
                     } catch (e: Exception) {
                         error = e.message ?: "Login failed"
                     } finally {

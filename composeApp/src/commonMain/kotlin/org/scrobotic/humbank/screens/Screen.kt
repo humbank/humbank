@@ -4,7 +4,7 @@ import org.scrobotic.humbank.data.Account
 import org.scrobotic.humbank.data.UserSession
 
 sealed interface Screen {
-    object Home : Screen
+    data class Home(val userSession: UserSession) : Screen
 
     object UserProfile : Screen
 

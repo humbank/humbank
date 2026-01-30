@@ -21,7 +21,7 @@ class ApiServiceImpl(
         httpClient.safeRequest {
             post("$baseUrl/login") {
                 contentType(ContentType.Application.Json)
-                setBody(LoginOut)
+                setBody(loginOut)
             }
         }
 

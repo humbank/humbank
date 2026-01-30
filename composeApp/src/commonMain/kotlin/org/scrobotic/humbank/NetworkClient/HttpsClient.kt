@@ -20,9 +20,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.internal.readJson
 
+
 val token = ""
-
-
 
 fun createNetworkClient(): HttpClient {
     return HttpClient {
@@ -33,7 +32,6 @@ fun createNetworkClient(): HttpClient {
         install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
-                isLenient = true
                 ignoreUnknownKeys = true
             })
         }

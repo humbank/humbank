@@ -4,13 +4,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import dev.burnoo.compose.remembersetting.rememberStringSetting
-
 import org.koin.compose.koinInject
 import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepositoryImpl
 import org.scrobotic.humbank.NetworkClient.ApiServiceImpl
 import org.scrobotic.humbank.NetworkClient.createNetworkClient
 import org.scrobotic.humbank.data.Transaction
+import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.data.generateRandomId
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.domain.Localization
@@ -29,13 +29,13 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 
-
-
 @OptIn(ExperimentalTime::class)
 @Composable
 @Preview
 fun App(navigator: Navigator, database: Database) {
     val httpClient = createNetworkClient()
+
+    var userSession: UserSession? by remember { mutableStateOf(null) }
 
     val apiService = ApiServiceImpl(
         httpClient = httpClient,
@@ -53,7 +53,7 @@ fun App(navigator: Navigator, database: Database) {
 
 
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         if (transactions.isEmpty()) {
             transactions.addAll(
                 listOf(
@@ -158,9 +158,6 @@ fun App(navigator: Navigator, database: Database) {
                     )
 
 
-
-
-
                 )
             )
         }
@@ -182,24 +179,28 @@ fun App(navigator: Navigator, database: Database) {
 
 
 
-        Scaffold(bottomBar= {
+        Scaffold(bottomBar = {
             if (navigator.current !is Screen.Login) {
                 BottomNavigationBar(
-                    onHomeClicked = { navigator.replace(Screen.Home) },
+                    onHomeClicked = {
+                        userSession?.let {
+                            navigator.replace(Screen.Home(it))
+                        }
+                    },
                     onSettingsClicked = { navigator.push(Screen.Settings) },
                     onNotificationsClicked = { navigator.push(Screen.Search) },
                     onAccountClicked = { navigator.push(Screen.UserProfile) }
                 )
             }
-        }){ innerPadding ->
+        }) { innerPadding ->
             when (val screen = navigator.current) {
 
-                Screen.Home -> HomeScreen(
+                is Screen.Home -> HomeScreen(
+                    userSession = screen.userSession,
                     contentPadding = innerPadding,
                     account = account,
-                    transactions = transactions,
-                    onNavigateToTransfer = {  },
-                    onNavigateToProfile ={  },
+                    onNavigateToTransfer = { },
+                    onNavigateToProfile = { },
                     repo = repo
                 )
 
@@ -221,7 +222,7 @@ fun App(navigator: Navigator, database: Database) {
 
                 Screen.Search -> SearchScreen(
                     repository = repo,
-                    onNavigateToAccount = {username ->
+                    onNavigateToAccount = { username ->
                         navigator.push(Screen.Profile(username))
                     }
                 )
@@ -229,8 +230,9 @@ fun App(navigator: Navigator, database: Database) {
                 is Screen.Profile -> ProfileScreen(
                     account = repo.getAccount(screen.username),
                     onTransaction = { account ->
-                    navigator.push(Screen.TransactionInput(account)) },
-                    onBack =  { navigator.pop() } )
+                        navigator.push(Screen.TransactionInput(account))
+                    },
+                    onBack = { navigator.pop() })
 
                 is Screen.TransactionInput -> TransactionInputScreen(
                     senderAccount = account,
@@ -245,8 +247,9 @@ fun App(navigator: Navigator, database: Database) {
                     onLogin = { username, password ->
                         apiRepository.login(username, password)
                     },
-                    onLoginSuccess = {
-                        navigator.push(Screen.Home)
+                    onLoginSuccess = { session ->
+                        userSession = session
+                        navigator.push(Screen.Home(session))
                     }
                 )
             }

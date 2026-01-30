@@ -30,7 +30,9 @@ import org.scrobotic.humbank.ui.Blue
 import org.scrobotic.humbank.ui.GreenStart
 import org.scrobotic.humbank.ui.Pink40
 import org.scrobotic.humbank.ui.elements.icons.processed.ReceiptLong
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun TransactionDetailContent(accountId: String?, transaction: Transaction, onClose: () -> Unit) {
     val isIncoming = transaction.receiver == accountId

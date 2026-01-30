@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.sp
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.formatCurrency
 import org.scrobotic.humbank.ui.BlueStart
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun BalanceLineChart(txs: List<Transaction>, accountId: String?, currentBal: Double) {
     val textMeasurer = rememberTextMeasurer()

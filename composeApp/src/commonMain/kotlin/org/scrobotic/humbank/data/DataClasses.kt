@@ -19,9 +19,9 @@ data class Transaction @OptIn(ExperimentalTime::class) constructor(
     val amount: Double,
     val pureDescription: String,
     val created: Instant,
-    val currentBalance: Double,
-    val isQrCode: Boolean = false
+    val currentBalance: Double
 )
+
 
 data class Account(
     val username: String,

@@ -33,15 +33,18 @@ import org.scrobotic.humbank.screens.home.components.TransactionDetailContent
 import org.scrobotic.humbank.screens.home.components.TransactionRow
 import org.scrobotic.humbank.ui.elements.icons.processed.Send
 import org.scrobotic.humbank.AccountRepository
+import org.scrobotic.humbank.data.UserSession
+import org.scrobotic.humbank.data.generateRandomId
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun HomeScreen(
+    userSession: UserSession,
     contentPadding: PaddingValues,
     account: Account?,
-    transactions: List<Transaction>,
     onNavigateToTransfer: () -> Unit,
     onNavigateToProfile: (String) -> Unit,
     repo: AccountRepository
@@ -54,7 +57,7 @@ fun HomeScreen(
 
     var showInputPopup by remember { mutableStateOf(false) }
 
-
+    val transactions = remember { mutableStateListOf<Transaction>() }
 
 //    LaunchedEffect(Unit) {
 //        val saved = storage.loadTransactions()
@@ -65,7 +68,116 @@ fun HomeScreen(
 //    }
 
     LaunchedEffect(Unit) {
+        if (transactions.isEmpty()) {
+            transactions.addAll(
+                listOf(
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_777",
+                        amount = 35.50,
+                        created = Instant.parse("2022-05-10T13:25:00Z"),
+                        pureDescription = "Café Besuch",
+                        currentBalance = 3389.31 - 35.50 // 3353.81
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "acc_666",
+                        receiver = "scrobotic",
+                        amount = 80.0,
+                        created = Instant.parse("2022-05-09T09:00:00Z"),
+                        pureDescription = "Verkauf Kleidung",
+                        currentBalance = 3309.31 + 80.0 // 3389.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_555",
+                        amount = 120.0,
+                        created = Instant.parse("2022-05-08T16:35:00Z"),
+                        pureDescription = "Restaurant",
+                        currentBalance = 3429.31 - 120.0 // 3309.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "acc_444",
+                        receiver = "scrobotic",
+                        amount = 500.0,
+                        created = Instant.parse("2022-05-07T11:50:00Z"),
+                        pureDescription = "Steuererstattung",
+                        currentBalance = 2929.31 + 500.0 // 3429.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_333",
+                        amount = 60.0,
+                        created = Instant.parse("2022-05-06T20:05:00Z"),
+                        pureDescription = "Supermarkt Einkauf",
+                        currentBalance = 2989.31 - 60.0 // 2929.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "acc_222",
+                        receiver = "scrobotic",
+                        amount = 150.0,
+                        created = Instant.parse("2022-05-05T14:10:00Z"),
+                        pureDescription = "Gehalt Nebenjob",
+                        currentBalance = 2839.31 + 150.0 // 2989.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_999",
+                        amount = 19.99,
+                        created = Instant.parse("2022-05-04T18:20:00Z"),
+                        pureDescription = "Netflix Abo",
+                        currentBalance = 2859.30 - 19.99 // 2839.31
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_555",
+                        amount = 500.0,
+                        created = Instant.parse("2022-05-03T08:30:00Z"),
+                        pureDescription = "Rückzahlung Freund",
+                        currentBalance = 3359.30 - 500.0 // 2859.30
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_888",
+                        amount = 75.20,
+                        created = Instant.parse("2022-05-02T12:45:00Z"),
+                        pureDescription = "Tankstelle",
+                        currentBalance = 3434.50 - 75.20 // 3359.30
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "scrobotic",
+                        receiver = "acc_999",
+                        amount = 565.50,
+                        created = Instant.parse("2022-05-01T15:00:00Z"),
+                        pureDescription = "Miete Mai",
+                        currentBalance = 4000.00 - 565.50 // 3434.50
+                    ),
+                    Transaction(
+                        id = "tx_${generateRandomId()}",
+                        sender = "SYSTEM",
+                        receiver = "scrobotic",
+                        amount = 4000.00,
+                        created = Instant.parse("2022-05-01T09:00:00Z"),
+                        pureDescription = "Anfangssaldo & Bonus",
+                        currentBalance = 0.0 + 4000.00 // Start balance
+                    )
 
+
+
+
+
+                )
+            )
+        }
         balance = transactions[0].currentBalance
     }
 
@@ -172,9 +284,9 @@ fun HomeScreen(
     if (showInputPopup) {
         repo.syncAccounts(listOf(
             Account(
-                username = "fingerlach",
-                fullName = "Finn Gerlach",
-                balance = 0.0,
+                username = "atzock",
+                fullName = "Hannes Atcock",
+                balance = 67.000,
                 role = "User"
             )
         ))
