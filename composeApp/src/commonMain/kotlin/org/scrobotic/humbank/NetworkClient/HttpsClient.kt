@@ -1,6 +1,10 @@
 package org.scrobotic.humbank.NetworkClient
 
 import androidx.compose.foundation.layout.ContextualFlowRow
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import dev.burnoo.compose.remembersetting.rememberStringSetting
 import io.ktor.client.*
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
@@ -21,9 +25,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.internal.readJson
 
 
-val token = ""
 
+@Composable
 fun createNetworkClient(): HttpClient {
+    var token by rememberStringSetting("token", "")
+
     return HttpClient {
         install(HttpRequestRetry){
             retryOnServerErrors(maxRetries = 2)

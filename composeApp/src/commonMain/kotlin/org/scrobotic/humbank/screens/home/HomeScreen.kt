@@ -63,6 +63,10 @@ fun HomeScreen(
 
     val transactions = remember { mutableStateListOf<Transaction>() }
 
+    var token by rememberStringSetting("token", "")
+
+    token = userSession.token
+
 //    LaunchedEffect(Unit) {
 //        val saved = storage.loadTransactions()
 //        if (saved.isNotEmpty()) {
@@ -286,14 +290,7 @@ fun HomeScreen(
     }
 
     if (showInputPopup) {
-        repo.syncAccounts(listOf(
-            Account(
-                username = "atzock",
-                fullName = "Hannes Atcock",
-                balance = 67.000,
-                role = "User"
-            )
-        ))
+        onNavigateToTransfer()
         showInputPopup = false
     }
 //        TransactionInputPopup(

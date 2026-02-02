@@ -30,4 +30,12 @@ data class Account(
     val role: String
 )
 
+@Serializable
+data class allAccount @OptIn(ExperimentalTime::class) constructor(
+    val username: String,
+    val role: String,
+    val updated_at: Instant,
+    val full_name: String,
+)
+
 

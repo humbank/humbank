@@ -4,6 +4,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import dev.burnoo.compose.remembersetting.rememberStringSetting
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepositoryImpl
@@ -35,7 +36,7 @@ import kotlin.time.Instant
 @Preview
 fun App(navigator: Navigator, database: Database) {
 
-
+    val scope = rememberCoroutineScope()
 
     val httpClient = createNetworkClient()
 
@@ -53,6 +54,17 @@ fun App(navigator: Navigator, database: Database) {
 
     val repo = AccountRepository(database)
     val transactions = remember { mutableStateListOf<Transaction>() }
+
+    repo.syncAccounts(
+        listOf(
+        Account(
+            username = "user1",
+            fullName = "Cornelius Binder",
+            balance = 67.0,
+            role = "Admin"
+        )
+        )
+    )
 
 
 
@@ -201,7 +213,17 @@ fun App(navigator: Navigator, database: Database) {
                 is Screen.Home -> HomeScreen(
                     userSession = screen.userSession,
                     contentPadding = innerPadding,
-                    onNavigateToTransfer = { },
+                    onNavigateToTransfer = {
+                        scope.launch {
+                            try {
+                                val accounts = apiService.getAllAccounts()
+                                println(accounts)
+                                // Do something with accounts (e.g., navigate or update state)
+                            } catch (e: Exception) {
+                                // Handle the error (e.g., show a Snackbar)
+                            }
+                        }
+                    },
                     onNavigateToProfile = { },
                     repo = repo
                 )

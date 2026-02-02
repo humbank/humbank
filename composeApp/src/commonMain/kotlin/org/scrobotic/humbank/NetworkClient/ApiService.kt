@@ -1,6 +1,7 @@
 package org.scrobotic.humbank.NetworkClient
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -10,6 +11,7 @@ import io.ktor.http.contentType
 
 interface ApiService {
     suspend fun login(loginOut: LoginOut): NetworkResult<LoginIn>
+    suspend fun getAllAccounts(): NetworkResult<List<allAccountsIn>>
 }
 
 class ApiServiceImpl(
@@ -22,6 +24,14 @@ class ApiServiceImpl(
             post("$baseUrl/login") {
                 contentType(ContentType.Application.Json)
                 setBody(loginOut)
+            }
+        }
+
+
+    override suspend fun getAllAccounts(): NetworkResult<List<allAccountsIn>> =
+        httpClient.safeRequest {
+            get("$baseUrl/get_all_users"){
+                contentType(ContentType.Application.Json)
             }
         }
 }
