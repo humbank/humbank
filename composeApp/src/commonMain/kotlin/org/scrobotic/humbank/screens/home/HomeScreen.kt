@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.burnoo.compose.remembersetting.rememberStringSetting
 import org.scrobotic.humbank.data.formatCurrency
 import org.scrobotic.humbank.ui.*
 import humbank.composeapp.generated.resources.Res
@@ -44,13 +45,16 @@ import kotlin.time.Instant
 fun HomeScreen(
     userSession: UserSession,
     contentPadding: PaddingValues,
-    account: Account?,
     onNavigateToTransfer: () -> Unit,
     onNavigateToProfile: (String) -> Unit,
     repo: AccountRepository
 ) {
-    val accountId = account?.username
-    var balance by remember { mutableStateOf(account?.balance ?: 0.0) }
+
+    val account = repo.getAccount(userSession.username)
+
+
+    var username by rememberStringSetting("account", account.username)
+    var balance by remember { mutableStateOf(account.balance) }
 
     var sel_tx by remember { mutableStateOf<Transaction?>(null) }
     val sheetState = rememberModalBottomSheetState()
@@ -185,12 +189,12 @@ fun HomeScreen(
 
     val incomingSum by remember {
         derivedStateOf {
-            transactions.filter { it.receiver == accountId }.sumOf { it.amount }
+            transactions.filter { it.receiver == username }.sumOf { it.amount }
         }
     }
     val outgoingSum by remember {
         derivedStateOf {
-            transactions.filter { it.sender == accountId }.sumOf { it.amount }
+            transactions.filter { it.sender == username }.sumOf { it.amount }
         }
     }
 
@@ -234,7 +238,7 @@ fun HomeScreen(
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(stringResource(Res.string.balance_title), color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)
                     Text("${balance.formatCurrency()} HMB", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                    Text("Account ID: $accountId", color = Color.Gray, fontSize = 10.sp, modifier = Modifier.padding(top = 8.dp))
+                    Text("Account ID: $username", color = Color.Gray, fontSize = 10.sp, modifier = Modifier.padding(top = 8.dp))
                     InfoCard(stringResource(Res.string.networth), "${if(networthSum > 0) "+" else ""}$networthSum HMB", if(networthSum > 0) GreenStart else Pink40, Modifier.weight(1f))
                 }
 
@@ -252,7 +256,7 @@ fun HomeScreen(
 
         item {
             Text(stringResource(Res.string.running_chart_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 8.dp))
-            BalanceLineChart(transactions, accountId, balance)
+            BalanceLineChart(transactions, username, balance)
         }
 
 
@@ -261,7 +265,7 @@ fun HomeScreen(
         }
 
         items(transactions.take(20)) { tx ->
-            TransactionRow(tx, accountId,
+            TransactionRow(tx, username,
                 onClick = {sel_tx = tx})
         }
     }
@@ -273,7 +277,7 @@ fun HomeScreen(
             containerColor = MaterialTheme.colorScheme.background
         ) {
             TransactionDetailContent(
-                accountId = accountId,
+                accountId = username,
                 transaction = sel_tx!!,
                 onClose = { sel_tx = null }
             )

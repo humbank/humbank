@@ -24,7 +24,4 @@ class ApiServiceImpl(
                 setBody(loginOut)
             }
         }
-
 }
-
-

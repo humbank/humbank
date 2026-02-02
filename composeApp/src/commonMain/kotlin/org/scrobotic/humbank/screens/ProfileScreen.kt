@@ -34,7 +34,7 @@ import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(account: Account?, onTransaction: (Account) -> Unit, onBack: () -> Unit){
+fun ProfileScreen(receiverAccount: Account?, onTransaction: (Account) -> Unit, onBack: () -> Unit){
     Scaffold(
         topBar = {
             TopAppBar(
@@ -56,7 +56,7 @@ fun ProfileScreen(account: Account?, onTransaction: (Account) -> Unit, onBack: (
                 .padding(padding),
             contentAlignment = Alignment.Center
         ) {
-            if (account != null) {
+            if (receiverAccount != null) {
                 // Display user profile
                 Column(
                     modifier = Modifier
@@ -74,18 +74,18 @@ fun ProfileScreen(account: Account?, onTransaction: (Account) -> Unit, onBack: (
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = account.fullName.firstOrNull()?.toString() ?: "?",
+                            text = receiverAccount.fullName.firstOrNull()?.toString() ?: "?",
                             color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Text("Name: ${account.fullName}", style = MaterialTheme.typography.titleMedium)
-                    Text("Username: ${account.username}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Name: ${receiverAccount.fullName}", style = MaterialTheme.typography.titleMedium)
+                    Text("Username: ${receiverAccount.username}", style = MaterialTheme.typography.bodyMedium)
 
                     Button(
-                        onClick = { onTransaction(account) },
+                        onClick = { onTransaction( receiverAccount) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(stringResource(Res.string.user_transaction))

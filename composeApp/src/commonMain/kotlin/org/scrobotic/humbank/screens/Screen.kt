@@ -12,9 +12,9 @@ sealed interface Screen {
 
     object Search : Screen
 
-    data class Profile(val username: String) : Screen
+    data class Profile(val receiverAccount: Account) : Screen
 
-    data class TransactionInput(val account: Account): Screen
+    data class TransactionInput(val senderAccount: Account, val receiverAccount: Account?): Screen
 
     object Login: Screen
 }

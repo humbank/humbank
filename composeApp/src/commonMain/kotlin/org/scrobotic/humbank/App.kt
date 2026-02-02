@@ -9,6 +9,7 @@ import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepositoryImpl
 import org.scrobotic.humbank.NetworkClient.ApiServiceImpl
 import org.scrobotic.humbank.NetworkClient.createNetworkClient
+import org.scrobotic.humbank.data.Account
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.data.generateRandomId
@@ -33,9 +34,14 @@ import kotlin.time.Instant
 @Composable
 @Preview
 fun App(navigator: Navigator, database: Database) {
+
+
+
     val httpClient = createNetworkClient()
 
     var userSession: UserSession? by remember { mutableStateOf(null) }
+
+
 
     val apiService = ApiServiceImpl(
         httpClient = httpClient,
@@ -45,10 +51,7 @@ fun App(navigator: Navigator, database: Database) {
     val apiRepository: ApiRepository =
         ApiRepositoryImpl(apiService)
 
-
-    val username = "scrobotic"
     val repo = AccountRepository(database)
-    val account = repo.getAccount(username)
     val transactions = remember { mutableStateListOf<Transaction>() }
 
 
@@ -198,7 +201,6 @@ fun App(navigator: Navigator, database: Database) {
                 is Screen.Home -> HomeScreen(
                     userSession = screen.userSession,
                     contentPadding = innerPadding,
-                    account = account,
                     onNavigateToTransfer = { },
                     onNavigateToProfile = { },
                     repo = repo
@@ -223,20 +225,22 @@ fun App(navigator: Navigator, database: Database) {
                 Screen.Search -> SearchScreen(
                     repository = repo,
                     onNavigateToAccount = { username ->
-                        navigator.push(Screen.Profile(username))
+                        navigator.push(Screen.Profile(receiverAccount = repo.getAccount(username)))
                     }
                 )
 
                 is Screen.Profile -> ProfileScreen(
-                    account = repo.getAccount(screen.username),
-                    onTransaction = { account ->
-                        navigator.push(Screen.TransactionInput(account))
+                    receiverAccount = screen.receiverAccount,
+                    onTransaction = { receiverAccount->
+                        navigator.push(Screen.TransactionInput(receiverAccount = receiverAccount, senderAccount = repo.getAccount(
+                            userSession?.username ?: ""
+                        )))
                     },
                     onBack = { navigator.pop() })
 
                 is Screen.TransactionInput -> TransactionInputScreen(
-                    senderAccount = account,
-                    receiverAccount = screen.account,
+                    senderAccount =screen.senderAccount,
+                    receiverAccount = screen.receiverAccount,
                     onNavigateBack = { navigator.pop() },
                     onTransactionCreated = { tx ->
                         transactions.add(tx)
@@ -248,7 +252,6 @@ fun App(navigator: Navigator, database: Database) {
                         apiRepository.login(username, password)
                     },
                     onLoginSuccess = { session ->
-                        userSession = session
                         navigator.push(Screen.Home(session))
                     }
                 )

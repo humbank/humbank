@@ -6,14 +6,19 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 sealed class NetworkResult<out T> {
-    // This subclass is correctly annotated.
+
     @Serializable
     data class Success<T>(val data: T) : NetworkResult<T>()
 
-    // This subclass is also correctly annotated.
+
     @Serializable
     data class Failure(val errorMessage: String) : NetworkResult<Nothing>()
 }
@@ -31,8 +36,8 @@ suspend inline fun <reified T> HttpResponse.handleResponse(): NetworkResult<T> {
             }
         }
         else -> {
-            val errorBody = bodyAsText()
-            NetworkResult.Failure("Error ${status.value}: $errorBody")
+            val error = bodyAsText()
+            NetworkResult.Failure(ErrorHandler(error))
         }
     }
 }
@@ -45,6 +50,6 @@ suspend inline fun <reified T> HttpClient.safeRequest(
         response.handleResponse<T>()
     } catch (e: Exception) {
         // This catch block will wrap any exception, including the serialization one.
-        NetworkResult.Failure("Network error: ${e.message}")
+        NetworkResult.Failure(e.message.toString())
     }
 }
