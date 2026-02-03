@@ -45,7 +45,7 @@ import kotlin.time.Instant
 fun HomeScreen(
     userSession: UserSession,
     contentPadding: PaddingValues,
-    onNavigateToTransfer: () -> Unit,
+    onGetAllUsers: () -> Unit,
     onNavigateToProfile: (String) -> Unit,
     repo: AccountRepository
 ) {
@@ -76,6 +76,10 @@ fun HomeScreen(
 //    }
 
     LaunchedEffect(Unit) {
+        onGetAllUsers()
+
+
+
         if (transactions.isEmpty()) {
             transactions.addAll(
                 listOf(
@@ -290,7 +294,6 @@ fun HomeScreen(
     }
 
     if (showInputPopup) {
-        onNavigateToTransfer()
         showInputPopup = false
     }
 //        TransactionInputPopup(

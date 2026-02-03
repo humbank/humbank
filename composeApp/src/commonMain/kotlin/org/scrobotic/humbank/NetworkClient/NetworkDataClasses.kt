@@ -17,9 +17,23 @@ data class LoginIn(
 )
 
 @Serializable
-data class allAccountsIn @OptIn(ExperimentalTime::class) constructor(
+data class AllAccountsIn @OptIn(ExperimentalTime::class) constructor(
     val username: String,
     val role: String,
     val updated_at: Instant,
     val full_name: String,
+)
+
+
+@Serializable
+data class TransactionsTodayIn(
+    val amount: Double
+)
+
+@Serializable
+data class TransferOut(
+    val transaction_id: String,
+    val amount: Double,
+    val description: String,
+    val issuer_username: String
 )
