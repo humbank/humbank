@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import dev.burnoo.compose.remembersetting.rememberStringSetting
 import kotlinx.coroutines.launch
 import org.scrobotic.humbank.data.UserSession
 
@@ -31,6 +32,7 @@ fun LoginScreen(
     onLogin: suspend (username: String, password: String) -> UserSession,
     onLoginSuccess: (UserSession) -> Unit
 ){
+    var token by rememberStringSetting("token", "")
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -90,6 +92,7 @@ fun LoginScreen(
                 scope.launch {
                     try {
                         val session = onLogin(username, password)
+                        token = session.token
                         onLoginSuccess(session)
                     } catch (e: Exception) {
                         error = e.message ?: "Login failed"

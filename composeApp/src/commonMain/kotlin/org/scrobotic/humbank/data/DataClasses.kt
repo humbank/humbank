@@ -17,9 +17,8 @@ data class Transaction @OptIn(ExperimentalTime::class) constructor(
     val sender: String,
     val receiver: String,
     val amount: Double,
-    val pureDescription: String,
-    val created: Instant,
-    val currentBalance: Double
+    val description: String,
+    val transaction_date: Instant,
 )
 
 
@@ -31,7 +30,7 @@ data class Account(
 )
 
 @Serializable
-data class allAccount @OptIn(ExperimentalTime::class) constructor(
+data class AllAccount @OptIn(ExperimentalTime::class) constructor(
     val username: String,
     val role: String,
     val updated_at: Instant,

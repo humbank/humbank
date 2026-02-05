@@ -26,7 +26,9 @@ import org.scrobotic.humbank.ui.GreenStart
 import org.scrobotic.humbank.ui.Pink40
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowUpward
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun TransactionRow(
     tx: Transaction,
@@ -64,14 +66,14 @@ fun TransactionRow(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = tx.pureDescription,
+                text = tx.description,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = tx.created.toString(),
+                text = tx.transaction_date.toString(),
                 color = Gray, // Using Gray from your UI palette
                 fontSize = 12.sp
             )

@@ -121,9 +121,8 @@ fun TransactionInputPopup(
                                 sender = sender, // Your ID
                                 receiver = receiver,
                                 amount = amt,
-                                created = Clock.System.now(), // Real timestamp
-                                pureDescription = description.ifBlank { "Überweisung" },
-                                currentBalance = account.balance - amt,
+                                description = TODO(),
+                                transaction_date = TODO(),
                             )
                             onTransactionCreated(newTx)
                             onDismiss()
@@ -134,9 +133,8 @@ fun TransactionInputPopup(
                                 sender = sender, // Your ID
                                 receiver = receiver,
                                 amount = amt,
-                                created = Clock.System.now(), // Real timestamp
-                                pureDescription = description.ifBlank { "Überweisung" },
-                                currentBalance = account.balance + amt,
+                                description = TODO(),
+                                transaction_date = TODO(),
                             )
                             onTransactionCreated(newTx)
                             onDismiss()

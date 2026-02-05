@@ -11,7 +11,7 @@ interface ApiService {
     suspend fun login(loginOut: LoginOut): NetworkResult<LoginIn>
     suspend fun getAllAccounts(): NetworkResult<List<AllAccountsIn>>
 
-    suspend fun getTodaysTransaction(): NetworkResult<List<TransactionsTodayIn>>
+    suspend fun getTodaysTransactions(): NetworkResult<List<TransactionsTodayIn>>
 
     suspend fun executeTransfer(transferOut: TransferOut): NetworkResult<Unit>
 }
@@ -37,14 +37,18 @@ class ApiServiceImpl(
             }
         }
 
+    override suspend fun getTodaysTransactions(): NetworkResult<List<TransactionsTodayIn>> =
+        httpClient.safeRequest {
+            get("$baseUrl/get_todays_transactions")
+        }
 
 
-    override suspend fun executeTransfer(): NetworkResult<Unit> {
+    override suspend fun executeTransfer(transferOut: TransferOut): NetworkResult<Unit> =
         httpClient.safeRequest {
             post("$baseUrl/execute_transfer"){
                 contentType(ContentType.Application.Json)
-                setBody()
+                setBody(transferOut)
             }
         }
-    }
+
 }

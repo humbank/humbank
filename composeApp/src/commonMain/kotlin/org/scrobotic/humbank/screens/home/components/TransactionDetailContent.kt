@@ -62,13 +62,13 @@ fun TransactionDetailContent(accountId: String?, transaction: Transaction, onClo
             fontWeight = FontWeight.ExtraBold,
             color = if (isIncoming) GreenStart else Pink40
         )
-        Text(transaction.created.toString(), color = Color.Gray, fontSize = 14.sp)
+        Text(transaction.transaction_date.toString(), color = Color.Gray, fontSize = 14.sp)
         Text(transaction.id, color = Color.Gray, fontSize = 14.sp)
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray.copy(alpha = 0.2f))
 
         // Data Grid Blueprint
-        DetailItem(label = stringResource(Res.string.tx_description), value = transaction.pureDescription)
+        DetailItem(label = stringResource(Res.string.tx_description), value = transaction.description)
         DetailItem(label = stringResource(Res.string.tx_senderID), value = transaction.sender)
         DetailItem(label = stringResource(Res.string.tx_receiverID), value = transaction.receiver)
         DetailItem(label = "Status", value = stringResource(Res.string.tx_completed))

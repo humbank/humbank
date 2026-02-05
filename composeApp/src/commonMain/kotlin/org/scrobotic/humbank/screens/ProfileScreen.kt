@@ -30,11 +30,12 @@ import humbank.composeapp.generated.resources.Res
 import humbank.composeapp.generated.resources.user_transaction
 import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.Account
+import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(receiverAccount: Account?, onTransaction: (Account) -> Unit, onBack: () -> Unit){
+fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Unit, onBack: () -> Unit){
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,14 +75,14 @@ fun ProfileScreen(receiverAccount: Account?, onTransaction: (Account) -> Unit, o
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = receiverAccount.fullName.firstOrNull()?.toString() ?: "?",
+                            text = receiverAccount.full_name.firstOrNull()?.toString() ?: "?",
                             color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Text("Name: ${receiverAccount.fullName}", style = MaterialTheme.typography.titleMedium)
+                    Text("Name: ${receiverAccount.full_name}", style = MaterialTheme.typography.titleMedium)
                     Text("Username: ${receiverAccount.username}", style = MaterialTheme.typography.bodyMedium)
 
                     Button(

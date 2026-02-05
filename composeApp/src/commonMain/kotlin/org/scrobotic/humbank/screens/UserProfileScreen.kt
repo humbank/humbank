@@ -26,14 +26,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.scrobotic.humbank.data.Account
+import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
-    account: Account?,      // Nullable now
+    account: AllAccount,      // Nullable now
     language: Language,
     onBack: () -> Unit
 ) {
@@ -76,17 +76,17 @@ fun UserProfileScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = account.fullName.firstOrNull()?.toString() ?: "?",
+                            text = account.full_name.firstOrNull()?.toString() ?: "?",
                             color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Text("Name: ${account.fullName}", style = MaterialTheme.typography.titleMedium)
+                    Text("Name: ${account.full_name}", style = MaterialTheme.typography.titleMedium)
                     Text("Username: ${account.username}", style = MaterialTheme.typography.bodyMedium)
                     Text("Role: ${account.role}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Balance: $${account.balance}", style = MaterialTheme.typography.bodyMedium)
+                    //Text("Balance: $${account.balance}", style = MaterialTheme.typography.bodyMedium)
                     Text("Language: ${language.name}", style = MaterialTheme.typography.bodyMedium)
 
                     Button(

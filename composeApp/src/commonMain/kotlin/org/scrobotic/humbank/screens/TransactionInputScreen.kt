@@ -29,18 +29,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.scrobotic.humbank.data.Account
+import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.generateRandomId
 import org.scrobotic.humbank.ui.elements.icons.processed.Close
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun TransactionInputScreen(
-    receiverAccount: Account?,
-    senderAccount: Account,
+    receiverAccount: AllAccount,
+    senderAccount: AllAccount,
     onNavigateBack: () -> Unit,
     onTransactionCreated: (Transaction) -> Unit
 ) {
@@ -189,9 +188,8 @@ fun TransactionInputScreen(
                         sender = senderAccount.username,
                         receiver = receiver,
                         amount = amt,
-                        created = Clock.System.now(),
-                        pureDescription = description,
-                        currentBalance = senderAccount.balance - amt
+                        description = TODO(),
+                        transaction_date = TODO(),
                     )
 
                     onTransactionCreated(newTx)

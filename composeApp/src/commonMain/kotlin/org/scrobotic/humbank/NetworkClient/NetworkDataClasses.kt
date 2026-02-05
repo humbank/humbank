@@ -27,7 +27,12 @@ data class AllAccountsIn @OptIn(ExperimentalTime::class) constructor(
 
 @Serializable
 data class TransactionsTodayIn(
-    val amount: Double
+    val amount: String,
+    val describtion: String,
+    val issuer_username: String,
+    val payer_username: String,
+    val transaction_date: String,
+    val transaction_id: String
 )
 
 @Serializable

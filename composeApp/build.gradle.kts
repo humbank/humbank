@@ -112,6 +112,7 @@ sqldelight {
     databases {
         create("Database") {
             packageName.set("org.scrobotic.humbank")
+            version = 2
         }
     }
 }

@@ -1,8 +1,10 @@
 package org.scrobotic.humbank.NetworkClient
 
+import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.UserSession
-import org.scrobotic.humbank.data.allAccount
+import org.scrobotic.humbank.data.AllAccount
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class ApiRepositoryImpl(
     private val apiService: ApiService,
@@ -32,12 +34,14 @@ class ApiRepositoryImpl(
 
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun getAllAccounts(): List<allAccount> {
+    override suspend fun getAllAccounts(): List<AllAccount> {
+        println("DEBUG: Calling getAllAccounts API...")
         return when (val result = apiService.getAllAccounts()) {
             is NetworkResult.Success -> {
+                println("DEBUG: Success - got ${result.data.size} accounts")
                 // Use .map to transform the API data into a list of your objects
                 result.data.map { accountData ->
-                    allAccount(
+                    AllAccount(
                         username = accountData.username,
                         role = accountData.role,
                         updated_at = accountData.updated_at,
@@ -47,8 +51,37 @@ class ApiRepositoryImpl(
             }
 
             is NetworkResult.Failure -> {
+                println("DEBUG: Failure - error: ${result.errorMessage}")
+
+                val errorMsg = result.errorMessage?.takeIf { it.isNotBlank() }
+                    ?: "Failed to fetch accounts. Please check your network connection."
+                throw Exception(errorMsg)
+            }
+        }
+    }
+
+
+    @OptIn(ExperimentalTime::class)
+    override suspend fun getTodaysTransactions(): List<Transaction> {
+        return when (val result = apiService.getTodaysTransactions()){
+            is NetworkResult.Success -> {
+                result.data.map { transferData ->
+                    Transaction(
+                        id = transferData.transaction_id,
+                        sender = transferData.payer_username,
+                        receiver = transferData.issuer_username,
+                        amount = transferData.amount.toDouble(),
+                        description = transferData.transaction_id,
+                        transaction_date = Instant.parse(transferData.transaction_date)
+                    )
+
+                }
+            }
+
+            is NetworkResult.Failure ->{
                 throw Exception(result.errorMessage)
             }
+
         }
     }
 }

@@ -1,6 +1,6 @@
 package org.scrobotic.humbank.screens
 
-import org.scrobotic.humbank.data.Account
+import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.UserSession
 
 sealed interface Screen {
@@ -12,9 +12,9 @@ sealed interface Screen {
 
     object Search : Screen
 
-    data class Profile(val receiverAccount: Account) : Screen
+    data class Profile(val receiverAccount: AllAccount) : Screen
 
-    data class TransactionInput(val senderAccount: Account, val receiverAccount: Account?): Screen
+    data class TransactionInput(val senderAccount: AllAccount, val receiverAccount: AllAccount): Screen
 
     object Login: Screen
 }

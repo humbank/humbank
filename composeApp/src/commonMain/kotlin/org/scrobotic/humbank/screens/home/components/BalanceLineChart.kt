@@ -59,7 +59,7 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String?, currentBal: Dou
                 return@Canvas
             }
 
-            val sortedTxs = txs.sortedBy { it.created }
+            val sortedTxs = txs.sortedBy { it.transaction_date }
 
             var runningTotal = currentBal.toFloat()
 
@@ -74,10 +74,10 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String?, currentBal: Dou
                 .asReversed()
 
 
-            val sortedTxsWithBalance = sortedTxs.sortedBy { it.created } // ascending by date
+            val sortedTxsWithBalance = sortedTxs.sortedBy { it.transaction_date } // ascending by date
 
-            val max = sortedTxsWithBalance.maxOfOrNull { it.currentBalance.toFloat() } ?: 1f
-            val min = sortedTxsWithBalance.minOfOrNull { it.currentBalance.toFloat() } ?: 0f
+            val max = 1f // sortedTxsWithBalance.maxOfOrNull { it.currentBalance.toFloat() } ?:
+            val min = 0f//sortedTxsWithBalance.minOfOrNull { it.currentBalance.toFloat() } ?:
             val range = (max - min).coerceAtLeast(1f)
 
             val displayMax = max + (range * 0.15f)
@@ -124,7 +124,7 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String?, currentBal: Dou
                 )
 
 
-                val dateText = sortedTxs[index].created.toString().substring(5, 10)
+                val dateText = sortedTxs[index].transaction_date.toString().substring(5, 10)
                 println(dateText)
 
                 // X-axis date label DOESNT WORK FOR SOME REASAOSJNANOPASNA
@@ -140,7 +140,7 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String?, currentBal: Dou
             val path = Path().apply {
                 sortedTxsWithBalance.forEachIndexed { i, tx ->
                     val x = i * (size.width / (sortedTxsWithBalance.size - 1).coerceAtLeast(1))
-                    val y = size.height - ((tx.currentBalance.toFloat() - displayMin) / displayRange * size.height)
+                    val y = 2f//size.height - ((tx.currentBalance.toFloat() - displayMin) / displayRange * size.height)
 
                     if (i == 0) moveTo(x, y) else lineTo(x, y)
                 }
@@ -149,7 +149,7 @@ fun BalanceLineChart(txs: List<Transaction>, accountId: String?, currentBal: Dou
             val fillPath = Path().apply {
                 sortedTxsWithBalance.forEachIndexed { i, tx ->
                     val x = i * (size.width / (sortedTxsWithBalance.size - 1).coerceAtLeast(1))
-                    val y = size.height - ((tx.currentBalance.toFloat() - displayMin) / displayRange * size.height)
+                    val y = 3f //size.height - ((tx.currentBalance.toFloat() - displayMin) / displayRange * size.height)
 
                     if (i == 0) {
                         moveTo(x, size.height)

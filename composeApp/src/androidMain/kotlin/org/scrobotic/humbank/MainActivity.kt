@@ -12,6 +12,7 @@ import org.scrobotic.humbank.screens.Navigator
 import androidx.activity.compose.BackHandler
 import createDatabase
 import org.koin.core.context.GlobalContext
+import org.scrobotic.humbank.screens.rememberNavigator
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val navigator = remember { Navigator() }
+            val navigator = rememberNavigator()
             val driverFactory = DriverFactory(context= applicationContext)
             val database = createDatabase(driverFactory)
 

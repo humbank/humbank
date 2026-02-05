@@ -1,6 +1,15 @@
 package org.scrobotic.humbank.screens
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+
+
+@Composable
+fun rememberNavigator(start: Screen = Screen.Login): Navigator {
+    return remember { Navigator(start) }
+}
+
 
 class Navigator(
     start: Screen = Screen.Login
