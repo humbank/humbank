@@ -55,6 +55,7 @@ fun HomeScreen(
     var account by remember { mutableStateOf<AllAccount?>(null) }
 
     LaunchedEffect(Unit) {
+        println(apiRepository.getTodaysTransactions())
         repo.syncAccounts(apiRepository.getAllAccounts())
         account = repo.getAccount(userSession.username)
     }

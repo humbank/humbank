@@ -1,0 +1,16 @@
+CREATE TABLE transactions (
+    transaction_id TEXT NOT NULL PRIMARY KEY,
+    amount TEXT NOT NULL,
+    description TEXT,
+    transaction_date TEXT NOT NULL,
+    issuer_username TEXT NOT NULL,
+    payer_username TEXT NOT NULL
+);
+
+insertTransaction:
+INSERT INTO
+transactions(transaction_id, amount, description, transaction_date, issuer_username, payer_username)
+VALUES (?,?,?,?,?, ?);
+
+selectAllTransactions:
+SELECT * FROM transactions;

@@ -5,6 +5,7 @@ import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.data.AllAccount
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import kotlinx.datetime.toInstant
 
 class ApiRepositoryImpl(
     private val apiService: ApiService,
@@ -71,7 +72,7 @@ class ApiRepositoryImpl(
                         sender = transferData.payer_username,
                         receiver = transferData.issuer_username,
                         amount = transferData.amount.toDouble(),
-                        description = transferData.transaction_id,
+                        description = transferData.description,
                         transaction_date = Instant.parse(transferData.transaction_date)
                     )
 
