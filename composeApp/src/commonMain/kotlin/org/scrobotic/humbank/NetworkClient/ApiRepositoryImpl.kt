@@ -85,4 +85,30 @@ class ApiRepositoryImpl(
 
         }
     }
+
+    override suspend fun executeTransfer(
+        token: String,
+        issuerUsername: String,
+        amount: Double,
+        transactionId: String,
+        description: String
+    ): Boolean {
+        return when (val result = apiService.executeTransfer(
+            token = token,
+            issuerUsername = issuerUsername,
+            amount = amount,
+            transactionId = transactionId,
+            description = description
+        )) {
+            is NetworkResult.Success -> {
+                // ✅ result.data is now a String: "Transfer completed"
+                println("DEBUG: Transfer successful - ${result.data}")
+                true
+            }
+            is NetworkResult.Failure -> {
+                println("DEBUG: Transfer failed - ${result.errorMessage}")
+                throw Exception(result.errorMessage ?: "Transfer failed")
+            }
+        }
+    }
 }

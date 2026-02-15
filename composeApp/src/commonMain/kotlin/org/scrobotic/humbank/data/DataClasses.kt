@@ -12,13 +12,15 @@ data class UserSession(
 )
 
 
+
+@Serializable
 data class Transaction @OptIn(ExperimentalTime::class) constructor(
     val id: String,
     val sender: String,
     val receiver: String,
     val amount: Double,
     val description: String,
-    val transaction_date: Instant,
+    val transaction_date: Instant
 )
 
 

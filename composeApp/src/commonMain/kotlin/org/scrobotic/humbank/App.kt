@@ -4,6 +4,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import dev.burnoo.compose.remembersetting.rememberStringSetting
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepositoryImpl
@@ -38,27 +39,15 @@ fun App(navigator: Navigator, database: Database) {
 
     var userSession: UserSession? by remember { mutableStateOf(null) }
 
-
-
     val apiService = ApiServiceImpl(
         httpClient = httpClient,
         baseUrl = "https://humbank.cv"
     )
 
-    val apiRepository: ApiRepository =
-        ApiRepositoryImpl(apiService)
+    val apiRepository: ApiRepository = ApiRepositoryImpl(apiService)
 
     val repo = AccountRepository(database)
     val transactions = remember { mutableStateListOf<Transaction>() }
-
-
-
-
-
-//    LaunchedEffect(Unit) {
-//        scope.launch { println(apiRepository.getTodaysTransactions()) }
-//    }
-
 
     HumbankUITheme {
         val localization = koinInject<Localization>()
@@ -72,8 +61,6 @@ fun App(navigator: Navigator, database: Database) {
         val selectedLanguage by derivedStateOf {
             Language.entries.first { it.iso == languageIso }
         }
-
-
 
         Scaffold(bottomBar = {
             if (navigator.current !is Screen.Login) {
@@ -94,7 +81,24 @@ fun App(navigator: Navigator, database: Database) {
                 is Screen.Home -> HomeScreen(
                     userSession = screen.userSession,
                     contentPadding = innerPadding,
-                    onNavigateToProfile = { },
+                    onNavigateToProfile = { username ->
+                        val account = repo.getAccount(username)
+                        navigator.push(Screen.Profile(receiverAccount = account))
+                    },
+                    onNavigateToTransfer = {
+                        // Navigate to transfer screen with no preset receiver
+                        userSession?.let { session ->
+                            val senderAccount = repo.getAccount(session.username)
+                            if (senderAccount != null) {
+                                navigator.push(
+                                    Screen.TransactionInput(
+                                        senderAccount = senderAccount,
+                                        receiverAccount = null
+                                    )
+                                )
+                            }
+                        }
+                    },
                     repo = repo,
                     apiRepository = apiRepository
                 )
@@ -102,7 +106,7 @@ fun App(navigator: Navigator, database: Database) {
                 Screen.UserProfile -> UserProfileScreen(
                     language = selectedLanguage,
                     onBack = { navigator.pop() },
-                    account = repo.getAccount(userSession?.username ?: "")
+                    account = userSession?.let { repo.getAccount(it.username) }
                 )
 
                 Screen.Settings -> SettingsScreen(
@@ -111,7 +115,6 @@ fun App(navigator: Navigator, database: Database) {
                         languageIso = selectedLanguage.iso
                         localization.applyLanguage(languageIso)
                     },
-
                     onBack = { navigator.pop() }
                 )
 
@@ -124,34 +127,56 @@ fun App(navigator: Navigator, database: Database) {
 
                 is Screen.Profile -> ProfileScreen(
                     receiverAccount = screen.receiverAccount,
-                    onTransaction = { receiverAccount->
-                        navigator.push(Screen.TransactionInput(
-                            receiverAccount = receiverAccount, senderAccount = repo.getAccount(
-                            userSession?.username ?: ""
-                        )))
+                    onTransaction = { receiverAccount ->
+                        userSession?.let { session ->
+                            val senderAccount = repo.getAccount(session.username)
+                            if (senderAccount != null) {
+                                navigator.push(
+                                    Screen.TransactionInput(
+                                        receiverAccount = receiverAccount,
+                                        senderAccount = senderAccount
+                                    )
+                                )
+                            }
+                        }
                     },
-                    onBack = { navigator.pop() })
+                    onBack = { navigator.pop() }
+                )
 
                 is Screen.TransactionInput -> TransactionInputScreen(
-                    senderAccount =screen.senderAccount,
+                    senderAccount = screen.senderAccount,
                     receiverAccount = screen.receiverAccount,
+                    userToken = userSession?.token ?: "",
+                    apiRepository = apiRepository,
                     onNavigateBack = { navigator.pop() },
-                    onTransactionCreated = { tx ->
-                        transactions.add(tx)
+                    onTransactionSuccess = {
+                        // Reload transactions after successful transfer
+                        scope.launch {
+                            try {
+                                val updatedTransactions = apiRepository.getTodaysTransactions()
+                                transactions.clear()
+                                transactions.addAll(updatedTransactions)
+
+                                // Reload accounts to update balances
+                                val allAccounts = apiRepository.getAllAccounts()
+                                repo.syncAccounts(allAccounts)
+                            } catch (e: Exception) {
+                                println("Failed to reload after transfer: ${e.message}")
+                            }
+                        }
                     }
                 )
 
                 Screen.Login -> LoginScreen(
                     onLogin = { username, password ->
                         apiRepository.login(username, password)
-
                     },
                     onLoginSuccess = { session ->
+                        userSession = session
                         navigator.push(Screen.Home(session))
                     }
                 )
             }
         }
-
     }
 }

@@ -14,7 +14,10 @@ sealed interface Screen {
 
     data class Profile(val receiverAccount: AllAccount) : Screen
 
-    data class TransactionInput(val senderAccount: AllAccount, val receiverAccount: AllAccount): Screen
+    data class TransactionInput(
+        val senderAccount: AllAccount,
+        val receiverAccount: AllAccount?
+    ): Screen
 
     object Login: Screen
 }

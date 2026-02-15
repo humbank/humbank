@@ -42,3 +42,8 @@ data class TransferOut(
     val description: String,
     val issuer_username: String
 )
+
+@Serializable
+data class TransferIn(
+    val message: String? = null
+)

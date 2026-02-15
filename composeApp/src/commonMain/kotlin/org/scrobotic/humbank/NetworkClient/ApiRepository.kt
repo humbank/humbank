@@ -9,4 +9,12 @@ interface ApiRepository {
     suspend fun getAllAccounts(): List<AllAccount>
 
     suspend fun getTodaysTransactions(): List<Transaction>
+
+    suspend fun executeTransfer(
+        token: String,
+        issuerUsername: String,
+        amount: Double,
+        transactionId: String,
+        description: String
+    ): Boolean
 }

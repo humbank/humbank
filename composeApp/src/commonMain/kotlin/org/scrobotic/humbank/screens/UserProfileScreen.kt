@@ -33,7 +33,7 @@ import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
-    account: AllAccount,      // Nullable now
+    account: AllAccount?,  // NOW ACTUALLY NULLABLE
     language: Language,
     onBack: () -> Unit
 ) {
@@ -86,7 +86,6 @@ fun UserProfileScreen(
                     Text("Name: ${account.full_name}", style = MaterialTheme.typography.titleMedium)
                     Text("Username: ${account.username}", style = MaterialTheme.typography.bodyMedium)
                     Text("Role: ${account.role}", style = MaterialTheme.typography.bodyMedium)
-                    //Text("Balance: $${account.balance}", style = MaterialTheme.typography.bodyMedium)
                     Text("Language: ${language.name}", style = MaterialTheme.typography.bodyMedium)
 
                     Button(

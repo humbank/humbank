@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.burnoo.compose.remembersetting.rememberStringSetting
+import kotlinx.coroutines.launch
 import org.scrobotic.humbank.data.formatCurrency
 import org.scrobotic.humbank.ui.*
 import humbank.composeapp.generated.resources.Res
@@ -26,7 +26,6 @@ import humbank.composeapp.generated.resources.last_transactions_title
 import humbank.composeapp.generated.resources.networth
 import humbank.composeapp.generated.resources.running_chart_title
 import org.jetbrains.compose.resources.stringResource
-import org.scrobotic.humbank.data.Account
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.screens.home.components.BalanceLineChart
 import org.scrobotic.humbank.screens.home.components.InfoCard
@@ -35,13 +34,9 @@ import org.scrobotic.humbank.screens.home.components.TransactionRow
 import org.scrobotic.humbank.ui.elements.icons.processed.Send
 import org.scrobotic.humbank.AccountRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepository
-import org.scrobotic.humbank.NetworkClient.ApiService
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.UserSession
-import org.scrobotic.humbank.data.generateRandomId
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
@@ -49,163 +44,289 @@ fun HomeScreen(
     userSession: UserSession,
     contentPadding: PaddingValues,
     onNavigateToProfile: (String) -> Unit,
+    onNavigateToTransfer: () -> Unit, // NEW: Navigation to transfer screen
     repo: AccountRepository,
     apiRepository: ApiRepository
 ) {
     var account by remember { mutableStateOf<AllAccount?>(null) }
+    var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
-        println(apiRepository.getTodaysTransactions())
-        repo.syncAccounts(apiRepository.getAllAccounts())
-        account = repo.getAccount(userSession.username)
+    var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
+    // Load data on first composition
+    LaunchedEffect(userSession.username) {
+        try {
+            isLoading = true
+            errorMessage = null
+
+            println("DEBUG: Starting data load for user: ${userSession.username}")
+
+            // Sync accounts from API
+            val allAccounts = apiRepository.getAllAccounts()
+            println("DEBUG: Received ${allAccounts.size} accounts from API")
+            repo.syncAccounts(allAccounts)
+
+            // Get current user's account
+            account = repo.getAccount(userSession.username)
+            println("DEBUG: Found account: ${account?.username}")
+
+            // Load transactions
+            transactions = apiRepository.getTodaysTransactions()
+                .sortedByDescending { it.transaction_date }
+            println("DEBUG: Loaded ${transactions.size} transactions")
+
+            isLoading = false
+        } catch (e: Exception) {
+            errorMessage = "Failed to load data: ${e.message}"
+            isLoading = false
+            e.printStackTrace()
+        }
     }
 
-// Show loading until account is ready
-    if (account == null) {
-        CircularProgressIndicator()
-    } else {
-        // Use account here
-
-
-
-
-
-        var username by rememberStringSetting("account", account!!.username)
-        var balance by remember { mutableStateOf("b") }
-
-        var sel_tx by remember { mutableStateOf<Transaction?>(null) }
-        val sheetState = rememberModalBottomSheetState()
-
-        var showInputPopup by remember { mutableStateOf(false) }
-
-        val transactions = remember { mutableStateListOf<Transaction>() }
-
-        var token by rememberStringSetting("token", "")
-
-        token = userSession.token
-
-
-
-        LaunchedEffect(Unit) {
-            //transactions.addAll(apiService.getTodaysTransactions())
-
-
-        }
-
-
-
-        val incomingSum by remember {
-            derivedStateOf {
-                transactions.filter { it.receiver == username }.sumOf { it.amount }
-            }
-        }
-        val outgoingSum by remember {
-            derivedStateOf {
-                transactions.filter { it.sender == username }.sumOf { it.amount }
-            }
-        }
-
-        val networthSum by remember{
-            derivedStateOf {
-                incomingSum - outgoingSum
-            }
-        }
-
-        LazyColumn(
+    // Show loading state
+    if (isLoading) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(PaddingValues(
+                .padding(contentPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Loading...", color = MaterialTheme.colorScheme.onBackground)
+            }
+        }
+        return
+    }
+
+    // Show error state
+    if (errorMessage != null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(32.dp)
+            ) {
+                Text(
+                    text = "Error",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = errorMessage ?: "Unknown error",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = {
+                    scope.launch {
+                        isLoading = true
+                        errorMessage = null
+                        try {
+                            val allAccounts = apiRepository.getAllAccounts()
+                            repo.syncAccounts(allAccounts)
+                            account = repo.getAccount(userSession.username)
+                            transactions = apiRepository.getTodaysTransactions()
+                                .sortedByDescending { it.transaction_date }
+                            isLoading = false
+                        } catch (e: Exception) {
+                            errorMessage = "Failed to load data: ${e.message}"
+                            isLoading = false
+                        }
+                    }
+                }) {
+                    Text("Retry")
+                }
+            }
+        }
+        return
+    }
+
+    // Show account not found state
+    if (account == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Account not found",
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 18.sp
+            )
+        }
+        return
+    }
+
+    // Calculate financial metrics
+    val incomingSum = transactions
+        .filter { it.receiver == account?.username }
+        .sumOf { it.amount }
+
+    val outgoingSum = transactions
+        .filter { it.sender == account?.username }
+        .sumOf { it.amount }
+
+    val networthSum = incomingSum - outgoingSum
+
+    // Calculate current balance based on transactions
+    // Note: You may want to fetch an actual initial balance from your API
+    val currentBalance = account?.let { acc ->
+        // This assumes you start with 0 and calculate from transactions
+        // You might want to add an initial_balance field to your account
+        networthSum
+    } ?: 0.0
+
+    // Main content
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(
+                PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
                     top = contentPadding.calculateTopPadding() + 16.dp,
-                    bottom = contentPadding.calculateBottomPadding() + 16.dp)),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(Res.string.dashboard_title), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onBackground)
-                        Text("${stringResource(Res.string.greeting)}${account?.full_name}", color = Gray, fontSize = 14.sp)
-                    }
-                    IconButton(onClick = { showInputPopup = true }) {
-                        Icon(Send, contentDescription = "Transfer", tint = Hannes_Gray)
-                    }
+                    bottom = contentPadding.calculateBottomPadding() + 16.dp
+                )
+            ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Header
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.dashboard_title),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = "${stringResource(Res.string.greeting)}${account?.full_name}",
+                        color = Gray,
+                        fontSize = 14.sp
+                    )
                 }
-            }
-
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(24.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(stringResource(Res.string.balance_title), color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)
-                        //Text("${balance.formatCurrency()} HMB", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                        Text("Account ID: $username", color = Color.Gray, fontSize = 10.sp, modifier = Modifier.padding(top = 8.dp))
-                        InfoCard(stringResource(Res.string.networth), "${if(networthSum > 0) "+" else ""}$networthSum HMB", if(networthSum > 0) GreenStart else Pink40, Modifier.weight(1f))
-                    }
-
+                // UPDATED: Navigate to transfer screen
+                IconButton(onClick = onNavigateToTransfer) {
+                    Icon(Send, contentDescription = "Transfer", tint = Hannes_Gray)
                 }
-            }
-
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    InfoCard(stringResource(Res.string.incomes), "+${incomingSum.formatCurrency()} HMB", GreenStart, Modifier.weight(1f))
-                    InfoCard(stringResource(Res.string.expenses), "-${outgoingSum.formatCurrency()} HMB", Pink40, Modifier.weight(1f))
-
-                }
-            }
-
-
-            item {
-                Text(stringResource(Res.string.running_chart_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 8.dp))
-                BalanceLineChart(transactions, username, 4.0)
-            }
-
-
-            item {
-                Text(stringResource(Res.string.last_transactions_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(top = 8.dp))
-            }
-
-            items(transactions.take(20)) { tx ->
-                TransactionRow(tx, username,
-                    onClick = {sel_tx = tx})
             }
         }
 
-        if(sel_tx != null){
-            ModalBottomSheet(
-                onDismissRequest = { sel_tx = null },
-                sheetState = sheetState,
-                containerColor = MaterialTheme.colorScheme.background
+        // Balance Card
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
-                TransactionDetailContent(
-                    accountId = username,
-                    transaction = sel_tx!!,
-                    onClose = { sel_tx = null }
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = stringResource(Res.string.balance_title),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "${currentBalance.formatCurrency()} HMB",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = "Account ID: ${account?.username}",
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    InfoCard(
+                        label = stringResource(Res.string.networth),
+                        value = "${if (networthSum > 0) "+" else ""}${networthSum.formatCurrency()} HMB",
+                        color = if (networthSum > 0) GreenStart else Pink40,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        // Income/Expense Cards
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                InfoCard(
+                    label = stringResource(Res.string.incomes),
+                    value = "+${incomingSum.formatCurrency()} HMB",
+                    color = GreenStart,
+                    modifier = Modifier.weight(1f)
+                )
+                InfoCard(
+                    label = stringResource(Res.string.expenses),
+                    value = "-${outgoingSum.formatCurrency()} HMB",
+                    color = Pink40,
+                    modifier = Modifier.weight(1f)
                 )
             }
-
         }
 
-        if (showInputPopup) {
-            showInputPopup = false
+        // Balance Chart
+        item {
+            Text(
+                text = stringResource(Res.string.running_chart_title),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            BalanceLineChart(
+                transactions = transactions,
+                accountId = account?.username ?: "",
+                currentBalance = currentBalance
+            )
         }
-//        TransactionInputPopup(
-//            account = account,
-//            onDismiss = { showInputPopup = false },
-//            onTransactionCreated = { newTx ->
-//                // Add to the START of the list (index 0) so it appears at the top
-//
-//            }
-//        )
-//    }
+
+        // Transactions List
+        item {
+            Text(
+                text = stringResource(Res.string.last_transactions_title),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        items(transactions.take(20)) { tx ->
+            TransactionRow(
+                tx = tx,
+                accountId = account?.username,
+                onClick = { selectedTransaction = tx }
+            )
+        }
     }
 
+    // Transaction Detail Bottom Sheet
+    selectedTransaction?.let { tx ->
+        ModalBottomSheet(
+            onDismissRequest = { selectedTransaction = null },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.background
+        ) {
+            TransactionDetailContent(
+                accountId = account?.username,
+                transaction = tx,
+                onClose = { selectedTransaction = null }
+            )
+        }
+    }
 }
-
-
