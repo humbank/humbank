@@ -111,4 +111,32 @@ class ApiRepositoryImpl(
             }
         }
     }
+
+
+    override suspend fun getBalance(): Double {
+        return when (val result = apiService.getBalance()) {
+            is NetworkResult.Success -> {
+                result.data
+            }
+
+            is NetworkResult.Failure -> {
+                println("DEBUG: getBalance failed - ${result.errorMessage}")
+                throw Exception(result.errorMessage ?: "Server Communication failed")
+            }
+        }
+
+    }
+
+    override suspend fun validateToken(): Boolean {
+        return when (val result = apiService.validateToken()) {
+            is NetworkResult.Success -> {
+                true
+            }
+
+            is NetworkResult.Failure -> {
+                println("DEBUG: validateToken failed - ${result.errorMessage}")
+                false
+            }
+        }
+    }
 }

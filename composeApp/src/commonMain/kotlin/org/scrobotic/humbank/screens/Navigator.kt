@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 
 @Composable
 fun rememberNavigator(start: Screen = Screen.Login): Navigator {
-    return remember { Navigator(start) }
+    return remember(start) { Navigator(start) }
 }
 
 

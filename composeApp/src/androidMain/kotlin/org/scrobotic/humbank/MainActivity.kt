@@ -11,12 +11,17 @@ import org.koin.android.ext.koin.androidContext
 import org.scrobotic.humbank.domain.initializeKoin
 import org.scrobotic.humbank.screens.Navigator
 import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import createDatabase
 import org.koin.core.context.GlobalContext
 import org.scrobotic.humbank.misc.FirstLaunchManager
 import org.scrobotic.humbank.screens.rememberNavigator
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
+import dev.burnoo.compose.remembersetting.rememberStringSetting
+import org.scrobotic.humbank.data.UserSession
+import org.scrobotic.humbank.screens.Screen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,15 +34,34 @@ class MainActivity : ComponentActivity() {
         }
 
         if (GlobalContext.getOrNull() == null) {
-
             initializeKoin(
                 config = { androidContext(this@MainActivity) }
             )
         }
 
         setContent {
-            val navigator = rememberNavigator()
-            val driverFactory = DriverFactory(context= applicationContext)
+
+            var savedToken by rememberStringSetting("token", "")
+            var savedUsername by rememberStringSetting("username", "")
+
+            println("🔍 STARTUP: token='${savedToken}', username='${savedUsername}'")
+            println("🔍 STARTUP: token.isNotEmpty()=${savedToken.isNotEmpty()}, username.isNotEmpty()=${savedUsername.isNotEmpty()}")
+
+            val startScreen = if (savedToken.isNotEmpty() && savedUsername.isNotEmpty()) {
+                println("✅ STARTUP: Starting at HOME")
+                Screen.Home(UserSession(token = savedToken, username = savedUsername))
+            } else {
+                println("❌ STARTUP: Starting at LOGIN")
+                Screen.Login
+            }
+
+            println("🔍 STARTUP: startScreen = $startScreen")
+
+            val navigator = rememberNavigator(start = startScreen)
+
+            println("🔍 STARTUP: navigator.current = ${navigator.current}")
+
+            val driverFactory = DriverFactory(context = applicationContext)
             val database = createDatabase(driverFactory)
 
             BackHandler {
@@ -51,15 +75,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-//
-//@Preview
-//@Composable
-//fun AppAndroidPreview() {
-//    val navigator = remember { Navigator() }
-//    val driverFactory = DriverFactory(context = a)
-//    val database = createDatabase(driverFactory)
-//    App(navigator = navigator, database = data)
-//}
 
 fun provideSettings(context: Context): Settings {
     val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +36,8 @@ import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 fun UserProfileScreen(
     account: AllAccount?,  // NOW ACTUALLY NULLABLE
     language: Language,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLogout: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -93,6 +95,17 @@ fun UserProfileScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Edit Profile")
+                    }
+                    Button(
+                        onClick = onLogout,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Logout")
                     }
                 }
             } else {

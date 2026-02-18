@@ -33,12 +33,14 @@ fun LoginScreen(
     onLoginSuccess: (UserSession) -> Unit
 ){
     var token by rememberStringSetting("token", "")
+    var savedUsername by rememberStringSetting("username", "")
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
     val scope = rememberCoroutineScope()
+
 
 
     Column(
@@ -48,6 +50,8 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+
 
         Text("Login", style = MaterialTheme.typography.headlineMedium)
 
@@ -92,7 +96,16 @@ fun LoginScreen(
                 scope.launch {
                     try {
                         val session = onLogin(username, password)
+
+                        println("🔍 LOGIN: session.token='${session.token}'")
+                        println("🔍 LOGIN: session.username='${session.username}'")
+
                         token = session.token
+                        savedUsername = session.username
+
+                        println("🔍 LOGIN: After save - token='${token}'")
+                        println("🔍 LOGIN: After save - savedUsername='${savedUsername}'")
+
                         onLoginSuccess(session)
                     } catch (e: Exception) {
                         error = e.message ?: "Login failed"

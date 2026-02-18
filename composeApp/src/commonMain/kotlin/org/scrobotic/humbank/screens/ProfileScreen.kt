@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +36,8 @@ import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Unit, onBack: () -> Unit){
+fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Unit, onBack: () -> Unit)
+                  {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -91,6 +93,8 @@ fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Un
                     ) {
                         Text(stringResource(Res.string.user_transaction))
                     }
+
+
                 }
             } else {
                 // User not found
@@ -102,6 +106,7 @@ fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Un
                 )
             }
         }
+
     }
 
 }

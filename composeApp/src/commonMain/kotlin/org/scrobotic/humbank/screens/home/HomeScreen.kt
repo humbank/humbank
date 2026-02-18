@@ -44,7 +44,8 @@ fun HomeScreen(
     userSession: UserSession,
     contentPadding: PaddingValues,
     onNavigateToProfile: (String) -> Unit,
-    onNavigateToTransfer: () -> Unit, // NEW: Navigation to transfer screen
+    onNavigateToTransfer: () -> Unit,
+    onTokenInvalid: () -> Unit,
     repo: AccountRepository,
     apiRepository: ApiRepository
 ) {
@@ -52,6 +53,10 @@ fun HomeScreen(
     var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var currentBalance by remember { mutableStateOf(0.0) }
+
+
+    var showAllTransactions by remember { mutableStateOf(false) }
 
     var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
     val sheetState = rememberModalBottomSheetState()
@@ -63,18 +68,20 @@ fun HomeScreen(
             isLoading = true
             errorMessage = null
 
-            println("DEBUG: Starting data load for user: ${userSession.username}")
+            val isTokenValid = apiRepository.validateToken()
+            if (!isTokenValid) {
+                onTokenInvalid()
+            }
 
             // Sync accounts from API
             val allAccounts = apiRepository.getAllAccounts()
-            println("DEBUG: Received ${allAccounts.size} accounts from API")
             repo.syncAccounts(allAccounts)
 
-            // Get current user's account
+
             account = repo.getAccount(userSession.username)
             println("DEBUG: Found account: ${account?.username}")
 
-            // Load transactions
+
             transactions = apiRepository.getTodaysTransactions()
                 .sortedByDescending { it.transaction_date }
             println("DEBUG: Loaded ${transactions.size} transactions")
@@ -84,6 +91,17 @@ fun HomeScreen(
             errorMessage = "Failed to load data: ${e.message}"
             isLoading = false
             e.printStackTrace()
+        }
+    }
+
+    LaunchedEffect(account) {
+        if (account != null) {
+            try {
+                currentBalance = apiRepository.getBalance()
+                println("DEBUG: Current balance loaded: $currentBalance")
+            } catch (e: Exception) {
+                println("DEBUG: Failed to load balance")
+            }
         }
     }
 
@@ -180,14 +198,11 @@ fun HomeScreen(
 
     val networthSum = incomingSum - outgoingSum
 
-    // Calculate current balance based on transactions
-    // Note: You may want to fetch an actual initial balance from your API
-    val currentBalance = account?.let { acc ->
-        // This assumes you start with 0 and calculate from transactions
-        // You might want to add an initial_balance field to your account
-        networthSum
-    } ?: 0.0
-
+    val transactionsToShow = if (showAllTransactions) {
+        transactions
+    } else {
+        transactions.take(5)
+    }
     // Main content
     LazyColumn(
         modifier = Modifier
@@ -290,7 +305,7 @@ fun HomeScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             BalanceLineChart(
-                transactions = transactions,
+                transactions.take(5),
                 accountId = account?.username ?: "",
                 currentBalance = currentBalance
             )
@@ -298,15 +313,42 @@ fun HomeScreen(
 
         // Transactions List
         item {
-            Text(
-                text = stringResource(Res.string.last_transactions_title),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(Res.string.last_transactions_title),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    if (transactions.size > 5) {
+                        Text(
+                            text = "Showing ${transactionsToShow.size} of ${transactions.size}",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
+                if (transactions.size > 5) {
+                    TextButton(
+                        onClick = { showAllTransactions = !showAllTransactions }
+                    ) {
+                        Text(
+                            text = if (showAllTransactions) "Show Less" else "Show More",
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
         }
 
-        items(transactions.take(20)) { tx ->
+        items(transactionsToShow) { tx ->
             TransactionRow(
                 tx = tx,
                 accountId = account?.username,

@@ -37,7 +37,23 @@ fun App(navigator: Navigator, database: Database) {
 
     val httpClient = createNetworkClient()
 
-    var userSession: UserSession? by remember { mutableStateOf(null) }
+
+
+    var token by rememberStringSetting("token", "")
+    var username by rememberStringSetting("username", "")
+
+    var userSession: UserSession? by remember {
+        mutableStateOf(
+            if (token.isNotEmpty() && username.isNotEmpty()) {
+                UserSession(token = token, username = username)
+            } else {
+                null
+            }
+        )
+    }
+
+
+
 
     val apiService = ApiServiceImpl(
         httpClient = httpClient,
@@ -99,6 +115,16 @@ fun App(navigator: Navigator, database: Database) {
                             }
                         }
                     },
+                    onTokenInvalid = {
+                        token = ""
+                        username = ""
+
+                        // Clear session
+                        userSession = null
+
+                        // Navigate to login
+                        navigator.replace(Screen.Login)
+                    },
                     repo = repo,
                     apiRepository = apiRepository
                 )
@@ -106,7 +132,19 @@ fun App(navigator: Navigator, database: Database) {
                 Screen.UserProfile -> UserProfileScreen(
                     language = selectedLanguage,
                     onBack = { navigator.pop() },
-                    account = userSession?.let { repo.getAccount(it.username) }
+                    account = userSession?.let { repo.getAccount(it.username) },
+                    onLogout = {
+                        // Clear saved credentials
+                        token = ""
+                        username = ""
+
+                        // Clear session
+                        userSession = null
+
+                        // Navigate to login
+                        navigator.replace(Screen.Login)
+
+                    }
                 )
 
                 Screen.Settings -> SettingsScreen(
@@ -141,6 +179,7 @@ fun App(navigator: Navigator, database: Database) {
                         }
                     },
                     onBack = { navigator.pop() }
+
                 )
 
                 is Screen.TransactionInput -> TransactionInputScreen(
@@ -173,7 +212,7 @@ fun App(navigator: Navigator, database: Database) {
                     },
                     onLoginSuccess = { session ->
                         userSession = session
-                        navigator.push(Screen.Home(session))
+                        navigator.replace(Screen.Home(session))
                     }
                 )
             }

@@ -17,4 +17,8 @@ interface ApiRepository {
         transactionId: String,
         description: String
     ): Boolean
+
+    suspend fun getBalance(): Double
+
+    suspend fun validateToken(): Boolean
 }

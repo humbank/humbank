@@ -26,6 +26,10 @@ interface ApiService {
         transactionId: String,
         description: String
     ): NetworkResult<String>
+
+    suspend fun getBalance(): NetworkResult<Double>
+
+    suspend fun validateToken(): NetworkResult<Unit>
 }
 
 class ApiServiceImpl(
@@ -96,4 +100,13 @@ class ApiServiceImpl(
         }
     }
 
+    override suspend fun getBalance(): NetworkResult<Double> =
+        httpClient.safeRequest {
+            get("$baseUrl/get_user_balance")
+        }
+
+    override suspend fun validateToken(): NetworkResult<Unit> =
+        httpClient.safeRequest {
+                get("$baseUrl/check_token_validity")
+            }
 }
