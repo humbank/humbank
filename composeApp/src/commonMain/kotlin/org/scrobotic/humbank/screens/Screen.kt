@@ -20,4 +20,6 @@ sealed interface Screen {
     ): Screen
 
     object Login: Screen
+
+    object AdminPanel: Screen
 }

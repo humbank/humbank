@@ -1,8 +1,21 @@
 package org.scrobotic.humbank
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import dev.burnoo.compose.remembersetting.rememberStringSetting
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -14,6 +27,7 @@ import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.domain.Localization
+import org.scrobotic.humbank.screens.AdminPanelScreen
 import org.scrobotic.humbank.screens.LoginScreen
 import org.scrobotic.humbank.screens.home.HomeScreen
 import org.scrobotic.humbank.screens.Navigator
@@ -30,7 +44,6 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 @Composable
-@Preview
 fun App(navigator: Navigator, database: Database) {
 
     val scope = rememberCoroutineScope()
@@ -79,7 +92,7 @@ fun App(navigator: Navigator, database: Database) {
         }
 
         Scaffold(bottomBar = {
-            if (navigator.current !is Screen.Login) {
+            if (navigator.current !is Screen.Login && navigator.current !is Screen.TransactionInput && navigator.current !is Screen.AdminPanel) {
                 BottomNavigationBar(
                     onHomeClicked = {
                         userSession?.let {
@@ -144,7 +157,8 @@ fun App(navigator: Navigator, database: Database) {
                         // Navigate to login
                         navigator.replace(Screen.Login)
 
-                    }
+                    },
+                    onAdminPanelClick = { navigator.push(Screen.AdminPanel)  }
                 )
 
                 Screen.Settings -> SettingsScreen(
@@ -215,6 +229,57 @@ fun App(navigator: Navigator, database: Database) {
                         navigator.replace(Screen.Home(session))
                     }
                 )
+
+                is Screen.AdminPanel -> {
+                    var isLoading by remember { mutableStateOf(true) }
+                    var error by remember { mutableStateOf<String?>(null) }
+
+                    // Load accounts once when screen is first shown
+                    LaunchedEffect(Unit) {
+                        try {
+                            repo.syncAccounts(apiRepository.getAllAccounts())
+                            isLoading = false
+                        } catch (e: Exception) {
+                            error = "Failed to load accounts: ${e.message}"
+                            isLoading = false
+                        }
+                    }
+
+                    // Show loading or error while data loads
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (error != null) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = error!!,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = {
+                                isLoading = true
+                                error = null
+                            }) {
+                                Text("Retry")
+                            }
+                        }
+                    } else {
+                        AdminPanelScreen(
+                            apiRepository = apiRepository,
+                            onBack = { navigator.pop() }
+                        )
+                    }
+                }
+
             }
         }
     }

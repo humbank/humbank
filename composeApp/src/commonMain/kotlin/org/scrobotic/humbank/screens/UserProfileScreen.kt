@@ -29,15 +29,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.domain.Language
+import org.scrobotic.humbank.ui.elements.icons.processed.ArrowBack
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
-    account: AllAccount?,  // NOW ACTUALLY NULLABLE
+    account: AllAccount?,
     language: Language,
     onBack: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onAdminPanelClick: () -> Unit  // New parameter for admin navigation
 ) {
     Scaffold(
         topBar = {
@@ -46,7 +48,7 @@ fun UserProfileScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = ArrowDownward,
+                            imageVector = ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -85,17 +87,16 @@ fun UserProfileScreen(
                         )
                     }
 
-                    Text("Name: ${account.full_name}", style = MaterialTheme.typography.titleMedium)
-                    Text("Username: ${account.username}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Role: ${account.role}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Language: ${language.name}", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = account.full_name,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = account.username,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
 
-                    Button(
-                        onClick = { /* TODO: Edit profile */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Edit Profile")
-                    }
+                    // Logout button (kept as-is)
                     Button(
                         onClick = onLogout,
                         modifier = Modifier
@@ -107,11 +108,22 @@ fun UserProfileScreen(
                     ) {
                         Text("Logout")
                     }
+
+                    // New admin panel button - only if user is admin
+                    if (account.role == "admin") {
+                        Button(
+                            onClick = onAdminPanelClick,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            Text("Admin Panel")
+                        }
+                    }
                 }
             } else {
-                // User not found
                 Text(
-                    "User not found",
+                    text = "User not found",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.Red,
                     textAlign = TextAlign.Center
