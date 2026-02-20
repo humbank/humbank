@@ -11,7 +11,6 @@ interface ApiRepository {
     suspend fun getTodaysTransactions(): List<Transaction>
 
     suspend fun executeTransfer(
-        token: String,
         issuerUsername: String,
         amount: Double,
         transactionId: String,
@@ -23,4 +22,9 @@ interface ApiRepository {
     suspend fun validateToken(): Boolean
 
     suspend fun updateAccounts(updatedAccountsOut: String?): List<AllAccount>
+
+
+    suspend fun createUser(firstName: String, lastName: String, username: String, pin: String, role: String): Boolean
+    suspend fun createBusiness(businessName: String, ownerUsername: String, pin: String, description: String): Boolean
+
 }

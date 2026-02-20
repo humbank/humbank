@@ -52,3 +52,25 @@ data class TransferIn(
 data class UpdateAccountsOut(
     val time: String?
 )
+
+@Serializable
+data class CreateUserOut(
+    val first_name: String,
+    val last_name: String,
+    val username: String,
+    val pin: String,
+    val role: String
+)
+
+@Serializable
+data class CreateBusinessOut(
+    val business_name: String,
+    val owner_username: String,
+    val pin: String,
+    val description: String
+)
+
+@Serializable
+data class CreateUserResponse(val message: String, val id: Int, val username: String)
+@Serializable
+data class CreateBusinessResponse(val message: String, val id: Int)

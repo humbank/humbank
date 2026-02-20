@@ -86,27 +86,24 @@ class ApiRepositoryImpl(
     }
 
     override suspend fun executeTransfer(
-        token: String,
         issuerUsername: String,
         amount: Double,
         transactionId: String,
         description: String
     ): Boolean {
         return when (val result = apiService.executeTransfer(
-            token = token,
             issuerUsername = issuerUsername,
             amount = amount,
             transactionId = transactionId,
             description = description
         )) {
             is NetworkResult.Success -> {
-                // ✅ result.data is now a String: "Transfer completed"
                 println("DEBUG: Transfer successful - ${result.data}")
                 true
             }
             is NetworkResult.Failure -> {
                 println("DEBUG: Transfer failed - ${result.errorMessage}")
-                throw Exception(result.errorMessage ?: "Transfer failed")
+                false
             }
         }
     }
@@ -161,4 +158,30 @@ class ApiRepositoryImpl(
 
 
     }
+
+    // In ApiRepositoryImpl
+    override suspend fun createUser(firstName: String, lastName: String, username: String, pin: String, role: String): Boolean {
+        return when (val result = apiService.createUser(
+            CreateUserOut(first_name = firstName, last_name = lastName, username = username, pin = pin, role = role)
+        )) {
+            is NetworkResult.Success -> {
+                println("User created: ${username}")
+                true
+            }
+            is NetworkResult.Failure -> throw Exception(result.errorMessage ?: "Create user failed")
+        }
+    }
+
+    override suspend fun createBusiness(businessName: String, ownerUsername: String, pin: String, description: String): Boolean {
+        return when (val result = apiService.createBusiness(
+            CreateBusinessOut(business_name = businessName, owner_username = ownerUsername, pin = pin, description = description)
+        )) {
+            is NetworkResult.Success -> {
+                println("Business created: $businessName")
+                true
+            }
+            is NetworkResult.Failure -> throw Exception(result.errorMessage ?: "Create business failed")
+        }
+    }
+
 }

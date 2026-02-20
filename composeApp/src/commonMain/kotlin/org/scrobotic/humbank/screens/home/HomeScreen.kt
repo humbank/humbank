@@ -1,6 +1,6 @@
 package org.scrobotic.humbank.screens.home
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,7 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,6 +25,7 @@ import humbank.composeapp.generated.resources.incomes
 import humbank.composeapp.generated.resources.last_transactions_title
 import humbank.composeapp.generated.resources.networth
 import humbank.composeapp.generated.resources.running_chart_title
+import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.screens.home.components.BalanceLineChart
@@ -34,8 +35,11 @@ import org.scrobotic.humbank.screens.home.components.TransactionRow
 import org.scrobotic.humbank.ui.elements.icons.processed.Send
 import org.scrobotic.humbank.AccountRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepository
+import org.scrobotic.humbank.NetworkClient.NetworkResult
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.UserSession
+import org.scrobotic.humbank.data.generateRandomId
+import org.scrobotic.humbank.screens.home.components.TransactionInputPopup
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
@@ -44,28 +48,56 @@ fun HomeScreen(
     userSession: UserSession,
     contentPadding: PaddingValues,
     onNavigateToProfile: (String) -> Unit,
-    onNavigateToTransfer: () -> Unit,
     onTokenInvalid: () -> Unit,
     repo: AccountRepository,
     apiRepository: ApiRepository
 ) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var account by remember { mutableStateOf<AllAccount?>(null) }
     var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var currentBalance by remember { mutableStateOf(0.0) }
 
-
+    // Transaction dialog state
+    var showTransactionDialog by remember { mutableStateOf(false) }
     var showAllTransactions by remember { mutableStateOf(false) }
-
     var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
+    var isTransactionLoading by remember { mutableStateOf(false) }
+
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(refreshTrigger) {
+        try {
+            // Start loading
+            if (refreshTrigger > 0) isTransactionLoading = true
+
+            val balanceResult = apiRepository.getBalance()
+            if (!coroutineContext.isActive) return@LaunchedEffect
+
+            val transactionsResult = apiRepository.getTodaysTransactions()
+
+            if (!coroutineContext.isActive) return@LaunchedEffect
+
+            currentBalance = balanceResult
+            transactions = transactionsResult.sortedByDescending { it.transaction_date }
+        } catch (e: Exception) {
+            // If it's a cancellation exception, don't show an error
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            println("DEBUG: Refresh failed: ${e.message}")
+        } finally {
+            // Only reset loading if we are still on this screen
+            if (coroutineContext.isActive) {
+                isTransactionLoading = false
+            }
+        }
+    }
 
     // Load data on first composition
     LaunchedEffect(userSession.username) {
-
-
         try {
             isLoading = true
             errorMessage = null
@@ -75,23 +107,17 @@ fun HomeScreen(
                 onTokenInvalid()
             }
 
-            // Sync accounts from API
             val latestTime = repo.getLatestTime()
             val updatedAccounts = if (latestTime != null) {
                 apiRepository.updateAccounts(latestTime)
             } else {
-                // No existing data, get all accounts
                 println("DEBUG: No cached data, fetching all accounts")
                 apiRepository.getAllAccounts()
             }
             repo.syncAccounts(updatedAccounts)
 
-
             account = repo.getAccount(userSession.username)
             println("DEBUG: Found account: ${account?.username}")
-
-
-
 
             transactions = apiRepository.getTodaysTransactions()
                 .sortedByDescending { it.transaction_date }
@@ -198,21 +224,21 @@ fun HomeScreen(
 
     // Calculate financial metrics
     val incomingSum = transactions
-        .filter { it.receiver == account?.username }
+        .filter { it.receiver == account!!.username }
         .sumOf { it.amount }
 
     val outgoingSum = transactions
-        .filter { it.sender == account?.username }
+        .filter { it.sender == account!!.username }
         .sumOf { it.amount }
 
     val networthSum = incomingSum - outgoingSum
-
     val transactionsToShow = if (showAllTransactions) {
         transactions
     } else {
         transactions.take(5)
     }
-    // Main content
+
+    // MAIN CONTENT - NO SCAFFOLD
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -227,7 +253,7 @@ fun HomeScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
+        // ✅ HEADER WITH SEND BUTTON - TOP RIGHT
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -239,14 +265,22 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = "${stringResource(Res.string.greeting)}${account?.full_name}",
-                        color = Gray,
+                        text = "${stringResource(Res.string.greeting)} ${account!!.full_name}",
+                        color = Color.Gray,
                         fontSize = 14.sp
                     )
                 }
-                // UPDATED: Navigate to transfer screen
-                IconButton(onClick = onNavigateToTransfer) {
-                    Icon(Send, contentDescription = "Transfer", tint = Hannes_Gray)
+                // ✅ SEND BUTTON - SIMPLE ICONBUTTON LIKE BEFORE
+                IconButton(
+                    onClick = { showTransactionDialog = true },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        Send,
+                        contentDescription = "Überweisen",
+                        tint = Color(0xFFE91E63),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }
@@ -271,7 +305,7 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = "Account ID: ${account?.username}",
+                        text = "Account ID: ${account!!.username}",
                         color = Color.Gray,
                         fontSize = 10.sp,
                         modifier = Modifier.padding(top = 8.dp)
@@ -315,7 +349,7 @@ fun HomeScreen(
             )
             BalanceLineChart(
                 transactions.take(5),
-                accountId = account?.username ?: "",
+                accountId = account!!.username,
                 currentBalance = currentBalance
             )
         }
@@ -360,10 +394,22 @@ fun HomeScreen(
         items(transactionsToShow) { tx ->
             TransactionRow(
                 tx = tx,
-                accountId = account?.username,
+                accountId = account!!.username,
                 onClick = { selectedTransaction = tx }
             )
         }
+    }
+
+    // Snackbar - positioned manually
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding)
+    ) {
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 
     // Transaction Detail Bottom Sheet
@@ -374,10 +420,45 @@ fun HomeScreen(
             containerColor = MaterialTheme.colorScheme.background
         ) {
             TransactionDetailContent(
-                accountId = account?.username,
+                accountId = account!!.username,
                 transaction = tx,
                 onClose = { selectedTransaction = null }
             )
         }
+    }
+
+    // Transaction Dialog
+    if (showTransactionDialog && account != null) {
+        isTransactionLoading = false
+        TransactionInputPopup(
+            balance = currentBalance,
+            senderAccount = account!!,
+            isLoading = isTransactionLoading,
+            onDismiss = { showTransactionDialog = false },
+            onSend = { amt, receiver, desc ->
+                isTransactionLoading = true
+                scope.launch {
+                        val result = apiRepository.executeTransfer(
+                            issuerUsername = receiver,
+                            amount = amt,
+                            transactionId = "tx_${generateRandomId()}",
+                            description = desc
+                        )
+
+                        showTransactionDialog = false
+
+                        if(result)
+                        {
+
+                            snackbarHostState.showSnackbar("Überweisung erfolgreich!")
+                            refreshTrigger++
+                        }
+                        else{
+                            snackbarHostState.showSnackbar("Überweisung fehlgeschlagen, falscher Name?")
+                        }
+
+                }
+            }
+        )
     }
 }

@@ -18,7 +18,6 @@ interface ApiService {
     suspend fun executeTransfer(transferOut: TransferOut): NetworkResult<Unit>
 
     suspend fun executeTransfer(
-        token: String,
         issuerUsername: String,
         amount: Double,
         transactionId: String,
@@ -30,6 +29,10 @@ interface ApiService {
     suspend fun validateToken(): NetworkResult<Unit>
 
     suspend fun updateAccounts(updatedAccountsOut: UpdateAccountsOut): NetworkResult<List<AllAccountsIn>>
+
+    suspend fun createUser(createUserOut: CreateUserOut): NetworkResult<Unit>
+
+    suspend fun createBusiness(createBusinessOut: CreateBusinessOut): NetworkResult<Unit>
 }
 
 class ApiServiceImpl(
@@ -68,15 +71,12 @@ class ApiServiceImpl(
         }
 
     override suspend fun executeTransfer(
-        token: String,
         issuerUsername: String,
         amount: Double,
         transactionId: String,
         description: String
     ): NetworkResult<String> {
-        return try {
             val response = httpClient.post("$baseUrl/execute_transfer") {
-                header("Authorization", "Bearer $token")
                 contentType(ContentType.Application.Json)
                 setBody(
                     TransferOut(
@@ -91,13 +91,10 @@ class ApiServiceImpl(
 
             val responseText = response.bodyAsText()
             println("DEBUG: Transfer response: $responseText")
-
+        return if(responseText.contains("Error"))
+            NetworkResult.Failure(responseText)
+        else
             NetworkResult.Success(responseText)
-        } catch (e: Exception) {
-            println("Transfer API error: ${e.message}")
-            e.printStackTrace()
-            NetworkResult.Failure(e.message ?: "Transfer failed")
-        }
     }
 
     override suspend fun getBalance(): NetworkResult<Double> =
@@ -116,6 +113,22 @@ class ApiServiceImpl(
             post("$baseUrl/get_updated_accounts_after_time"){
                 contentType(ContentType.Application.Json)
                 setBody(updatedAccountsOut)
+            }
+        }
+
+    override suspend fun createUser(user: CreateUserOut): NetworkResult<Unit> =
+        httpClient.safeRequest {
+            post("$baseUrl/create_user") {
+                contentType(ContentType.Application.Json)
+                setBody(user)
+            }
+        }
+
+    override suspend fun createBusiness(business: CreateBusinessOut): NetworkResult<Unit> =
+        httpClient.safeRequest {
+            post("$baseUrl/create_business") {
+                contentType(ContentType.Application.Json)
+                setBody(business)
             }
         }
 }

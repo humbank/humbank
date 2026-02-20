@@ -3,6 +3,7 @@ package org.scrobotic.humbank.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -10,13 +11,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -34,7 +40,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import org.humbank.ktorclient.icons.imagevectors.Account
 import org.scrobotic.humbank.NetworkClient.ApiRepository
+import org.scrobotic.humbank.NetworkClient.NetworkResult
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.generateRandomId
 import org.scrobotic.humbank.ui.elements.icons.processed.Close
@@ -50,224 +58,224 @@ fun TransactionInputScreen(
     onNavigateBack: () -> Unit,
     onTransactionSuccess: () -> Unit
 ) {
-    // Input states
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Form states
     var amount by remember { mutableStateOf("") }
     var receiver by remember { mutableStateOf(receiverAccount?.username ?: "") }
     var description by remember { mutableStateOf("") }
-
-    // UI states
-    var showError by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
-    val scope = rememberCoroutineScope()
+    // Validation states
+    var amountError by remember { mutableStateOf(false) }
+    var receiverError by remember { mutableStateOf(false) }
+    var descriptionError by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = Color(0xFF1E1E1E),
+        containerColor = Color(0xFF0F0F0F), // True dark
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = "Neue Überweisung",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+                title = { Text("Neue Überweisung", color = Color.White, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack, enabled = !isLoading) {
-                        Icon(
-                            imageVector = Close,
-                            contentDescription = "Zurück",
-                            tint = Color.White
-                        )
+                        Icon(Close, "Zurück", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1E1E1E)
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1E1E1E))
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
+            // Balance preview card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Ihr Kontostand",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "€${senderAccount.full_name}", // Replace with real balance
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+
+            // Amount field with live validation
             OutlinedTextField(
                 value = amount,
-                onValueChange = { amount = it },
+                onValueChange = { newAmount ->
+                    amount = newAmount
+                    amountError = newAmount.toDoubleOrNull()?.let { it <= 0 } == true || newAmount.isBlank()
+                },
                 label = { Text("Betrag (HMB)") },
+                prefix = { Text("€", color = Color.Gray) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
+                singleLine = true,
+                isError = amountError,
+                supportingText = {
+                    if (amountError) {
+                        Text("Mindestens €0.01", color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF2A2A2A),
+                    unfocusedContainerColor = Color(0xFF2A2A2A),
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.Gray,
-                    disabledTextColor = Color.Gray
-                ),
-                isError = showError && amount.isBlank()
+                    errorTextColor = MaterialTheme.colorScheme.error
+                )
             )
 
-            // Sender field - always read-only, showing current user's account
+            // Sender (read-only)
             OutlinedTextField(
                 value = senderAccount.username,
                 onValueChange = { },
-                label = { Text("Sender ID") },
+                label = { Text("Von (Sie)") },
+                leadingIcon = { Icon(Account, null, tint = Color.Gray) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = false,
                 colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = Color.White,
-                    disabledLabelColor = Color.Gray
+                    disabledTextColor = Color.White.copy(alpha = 0.7f)
                 )
             )
 
-            // Receiver field - editable if receiverAccount is null, otherwise read-only
-            if (receiverAccount == null) {
-                OutlinedTextField(
-                    value = receiver,
-                    onValueChange = { receiver = it },
-                    label = { Text("Empfänger ID") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.Gray,
-                        disabledTextColor = Color.Gray
-                    ),
-                    isError = showError && receiver.isBlank()
+            // Receiver field
+            OutlinedTextField(
+                value = receiver,
+                onValueChange = { newReceiver ->
+                    receiver = newReceiver
+                    receiverError = newReceiver.isBlank() || newReceiver == senderAccount.username
+                },
+                label = { Text(receiverAccount?.full_name ?: "An Empfänger ID") },
+                leadingIcon = { Icon(Account, null, tint = Color.Gray) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = receiverAccount == null && !isLoading,
+                singleLine = true,
+                isError = receiverError,
+                supportingText = {
+                    if (receiverError && receiver == senderAccount.username) {
+                        Text("Kann nicht an sich selbst senden", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF2A2A2A),
+                    unfocusedContainerColor = Color(0xFF2A2A2A),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 )
-            } else {
-                OutlinedTextField(
-                    value = receiver,
-                    onValueChange = { },
-                    label = { Text("Empfänger ID") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = Color.White,
-                        disabledLabelColor = Color.Gray
-                    )
-                )
-            }
+            )
 
+            // Description
             OutlinedTextField(
                 value = description,
-                onValueChange = { description = it },
+                onValueChange = { newDesc ->
+                    description = newDesc
+                    descriptionError = newDesc.isBlank()
+                },
                 label = { Text("Verwendungszweck") },
+                maxLines = 2,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
+                isError = descriptionError,
+                supportingText = {
+                    if (descriptionError) {
+                        Text("Verwendungszweck erforderlich", color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF2A2A2A),
+                    unfocusedContainerColor = Color(0xFF2A2A2A),
                     focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.Gray,
-                    disabledTextColor = Color.Gray
-                ),
-                isError = showError && description.isBlank()
+                    unfocusedTextColor = Color.White
+                )
             )
 
-            if (showError && errorMessage.isNotEmpty()) {
-                Text(
-                    text = errorMessage,
-                    color = Color.Red,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+            // Confirm button
             Button(
                 onClick = {
-                    // Validate all fields
                     val amt = amount.toDoubleOrNull()
-
-                    if (amt == null || amt <= 0) {
-                        showError = true
-                        errorMessage = "Bitte geben Sie einen gültigen Betrag ein"
+                    if (amt == null || amt <= 0 || receiver.isBlank() ||
+                        description.isBlank() || receiver == senderAccount.username) {
                         return@Button
                     }
 
-                    if (receiver.isBlank()) {
-                        showError = true
-                        errorMessage = "Bitte geben Sie einen Empfänger ein"
-                        return@Button
-                    }
-
-                    if (description.isBlank()) {
-                        showError = true
-                        errorMessage = "Bitte geben Sie einen Verwendungszweck ein"
-                        return@Button
-                    }
-
-                    if (receiver == senderAccount.username) {
-                        showError = true
-                        errorMessage = "Sie können nicht an sich selbst überweisen"
-                        return@Button
-                    }
-
-                    // Reset error state
-                    showError = false
-                    errorMessage = ""
                     isLoading = true
 
-                    // Execute transfer via API
                     scope.launch {
                         try {
                             val transactionId = "tx_${generateRandomId()}"
-
-                            val success = apiRepository.executeTransfer(
-                                token = userToken,
+                            val result = apiRepository.executeTransfer(
                                 issuerUsername = receiver,
                                 amount = amt,
                                 transactionId = transactionId,
                                 description = description
                             )
 
-                            if (success) {
-                                // Transfer successful
-                                isLoading = false
-                                onTransactionSuccess()
-                                onNavigateBack()
-                            } else {
-                                isLoading = false
-                                showError = true
-                                errorMessage = "Überweisung fehlgeschlagen"
+                            when (result) {
+                                is NetworkResult.Success<*> -> {
+                                    // ✅ NAVIGATE FIRST
+                                    onTransactionSuccess()
+                                    onNavigateBack()
+
+                                    // ✅ THEN snackbar shows on previous screen
+                                    snackbarHostState.showSnackbar("✅ Überweisung erfolgreich!")
+                                }
+                                is NetworkResult.Failure -> {
+                                    // ✅ NAVIGATE FIRST (for error too)
+                                    onNavigateBack()
+
+                                    val errorMsg = when {
+                                        result.errorMessage?.contains("User not found") == true -> "Empfänger nicht gefunden"
+                                        result.errorMessage?.contains("Insufficient funds") == true -> "Nicht genug Guthaben"
+                                        else -> result.errorMessage ?: "Überweisung fehlgeschlagen"
+                                    }
+                                    snackbarHostState.showSnackbar("❌ $errorMsg")
+                                }
+                                else -> {
+                                    onNavigateBack()
+                                    snackbarHostState.showSnackbar("❌ Unbekannter Fehler")
+                                }
                             }
+
                         } catch (e: Exception) {
+                            onNavigateBack()
+                            snackbarHostState.showSnackbar("❌ Netzwerkfehler")
+                        } finally {
                             isLoading = false
-                            showError = true
-                            errorMessage = e.message ?: "Überweisung fehlgeschlagen"
-                            println("Transfer error: ${e.message}")
-                            e.printStackTrace()
                         }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = !isLoading,
+                enabled = !isLoading && !amountError && !receiverError && !descriptionError,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE91E63),
-                    disabledContainerColor = Color(0xFFE91E63).copy(alpha = 0.5f)
+                    containerColor = Color(0xFFE91E63)
                 )
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
                 } else {
-                    Text("Überweisung bestätigen", fontWeight = FontWeight.Bold)
+                    Text("Überweisung senden", fontWeight = FontWeight.Bold)
                 }
             }
         }

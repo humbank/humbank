@@ -114,20 +114,6 @@ fun App(navigator: Navigator, database: Database) {
                         val account = repo.getAccount(username)
                         navigator.push(Screen.Profile(receiverAccount = account))
                     },
-                    onNavigateToTransfer = {
-                        // Navigate to transfer screen with no preset receiver
-                        userSession?.let { session ->
-                            val senderAccount = repo.getAccount(session.username)
-                            if (senderAccount != null) {
-                                navigator.push(
-                                    Screen.TransactionInput(
-                                        senderAccount = senderAccount,
-                                        receiverAccount = null
-                                    )
-                                )
-                            }
-                        }
-                    },
                     onTokenInvalid = {
                         token = ""
                         username = ""
@@ -139,7 +125,7 @@ fun App(navigator: Navigator, database: Database) {
                         navigator.replace(Screen.Login)
                     },
                     repo = repo,
-                    apiRepository = apiRepository
+                    apiRepository = apiRepository,
                 )
 
                 Screen.UserProfile -> UserProfileScreen(
