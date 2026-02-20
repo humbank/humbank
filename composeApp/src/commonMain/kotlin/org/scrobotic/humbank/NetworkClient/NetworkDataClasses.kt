@@ -47,3 +47,8 @@ data class TransferOut(
 data class TransferIn(
     val message: String? = null
 )
+
+@Serializable
+data class UpdateAccountsOut(
+    val time: String?
+)

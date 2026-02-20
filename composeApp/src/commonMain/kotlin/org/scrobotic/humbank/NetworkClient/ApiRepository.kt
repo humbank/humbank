@@ -21,4 +21,6 @@ interface ApiRepository {
     suspend fun getBalance(): Double
 
     suspend fun validateToken(): Boolean
+
+    suspend fun updateAccounts(updatedAccountsOut: String?): List<AllAccount>
 }

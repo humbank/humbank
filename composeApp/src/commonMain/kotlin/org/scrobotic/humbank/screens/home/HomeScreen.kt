@@ -64,6 +64,8 @@ fun HomeScreen(
 
     // Load data on first composition
     LaunchedEffect(userSession.username) {
+
+
         try {
             isLoading = true
             errorMessage = null
@@ -74,12 +76,21 @@ fun HomeScreen(
             }
 
             // Sync accounts from API
-            val allAccounts = apiRepository.getAllAccounts()
-            repo.syncAccounts(allAccounts)
+            val latestTime = repo.getLatestTime()
+            val updatedAccounts = if (latestTime != null) {
+                apiRepository.updateAccounts(latestTime)
+            } else {
+                // No existing data, get all accounts
+                println("DEBUG: No cached data, fetching all accounts")
+                apiRepository.getAllAccounts()
+            }
+            repo.syncAccounts(updatedAccounts)
 
 
             account = repo.getAccount(userSession.username)
             println("DEBUG: Found account: ${account?.username}")
+
+
 
 
             transactions = apiRepository.getTodaysTransactions()
@@ -151,8 +162,6 @@ fun HomeScreen(
                         isLoading = true
                         errorMessage = null
                         try {
-                            val allAccounts = apiRepository.getAllAccounts()
-                            repo.syncAccounts(allAccounts)
                             account = repo.getAccount(userSession.username)
                             transactions = apiRepository.getTodaysTransactions()
                                 .sortedByDescending { it.transaction_date }

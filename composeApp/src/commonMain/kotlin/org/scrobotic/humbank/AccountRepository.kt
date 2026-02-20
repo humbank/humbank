@@ -48,4 +48,11 @@ class AccountRepository(database: Database) {
         return queries.searchAccounts(query).asFlow().mapToList(Dispatchers.IO)
     }
 
+    @OptIn(ExperimentalTime::class)
+    fun getLatestTime(): String? {
+        queries.selectLatestTime().executeAsOneOrNull()?.let {
+            return it.MAX
+        }
+        return null
+        }
 }

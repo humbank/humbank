@@ -5,7 +5,6 @@ import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.data.AllAccount
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlinx.datetime.toInstant
 
 class ApiRepositoryImpl(
     private val apiService: ApiService,
@@ -138,5 +137,28 @@ class ApiRepositoryImpl(
                 false
             }
         }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    override suspend fun updateAccounts(updatedAccountsOut: String?): List<AllAccount> {
+        return when (val result = apiService.updateAccounts(UpdateAccountsOut(updatedAccountsOut))){
+            is NetworkResult.Success -> {
+                result.data.map { accountData ->
+                    AllAccount(
+                        username = accountData.username,
+                        role = accountData.role,
+                        updated_at = accountData.updated_at,
+                        full_name = accountData.full_name
+                    )
+                }
+            }
+
+            is NetworkResult.Failure -> {
+                throw Exception(result.errorMessage)
+            }
+
+        }
+
+
     }
 }

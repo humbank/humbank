@@ -1,7 +1,6 @@
 package org.scrobotic.humbank.NetworkClient
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -9,7 +8,6 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import org.scrobotic.humbank.screens.TransactionInputScreen
 
 interface ApiService {
     suspend fun login(loginOut: LoginOut): NetworkResult<LoginIn>
@@ -30,6 +28,8 @@ interface ApiService {
     suspend fun getBalance(): NetworkResult<Double>
 
     suspend fun validateToken(): NetworkResult<Unit>
+
+    suspend fun updateAccounts(updatedAccountsOut: UpdateAccountsOut): NetworkResult<List<AllAccountsIn>>
 }
 
 class ApiServiceImpl(
@@ -109,4 +109,13 @@ class ApiServiceImpl(
         httpClient.safeRequest {
                 get("$baseUrl/check_token_validity")
             }
+
+
+    override suspend fun updateAccounts(updatedAccountsOut: UpdateAccountsOut): NetworkResult<List<AllAccountsIn>> =
+        httpClient.safeRequest {
+            post("$baseUrl/get_updated_accounts_after_time"){
+                contentType(ContentType.Application.Json)
+                setBody(updatedAccountsOut)
+            }
+        }
 }
