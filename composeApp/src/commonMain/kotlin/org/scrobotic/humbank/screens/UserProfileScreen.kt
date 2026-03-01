@@ -4,11 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,8 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.domain.Language
+import org.scrobotic.humbank.ui.HumbankGradientScreen
+import org.scrobotic.humbank.ui.HumbankPanelCard
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowBack
-import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +40,7 @@ fun UserProfileScreen(
     language: Language,
     onBack: () -> Unit,
     onLogout: () -> Unit,
-    onAdminPanelClick: () -> Unit  // New parameter for admin navigation
+    onAdminPanelClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -47,87 +48,79 @@ fun UserProfileScreen(
                 title = { Text("Profile") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = ArrowBack,
-                            contentDescription = "Back"
-                        )
+                        Icon(imageVector = ArrowBack, contentDescription = "Back")
                     }
                 }
             )
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
-        ) {
-            if (account != null) {
-                // Display user profile
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Avatar placeholder
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = account.full_name.firstOrNull()?.toString() ?: "?",
-                            color = Color.White,
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Text(
-                        text = account.full_name,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = account.username,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    // Logout button (kept as-is)
-                    Button(
-                        onClick = onLogout,
+        HumbankGradientScreen(modifier = Modifier.padding(padding)) {
+            HumbankPanelCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .align(Alignment.TopCenter)
+            ) {
+                if (account != null) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Logout")
-                    }
-
-                    // New admin panel button - only if user is admin
-                    if (account.role == "admin") {
-                        Button(
-                            onClick = onAdminPanelClick,
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                                .size(96.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF4B3D72)),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text("Admin Panel")
+                            Text(
+                                text = account.full_name.firstOrNull()?.toString() ?: "?",
+                                color = Color.White,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Text(text = account.full_name, style = MaterialTheme.typography.titleLarge, color = Color.White)
+                        Text(text = "@${account.username}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFAFA6D4))
+
+                        Button(
+                            onClick = onLogout,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF375D), contentColor = Color.White)
+                        ) {
+                            Text("Logout", fontWeight = FontWeight.SemiBold)
+                        }
+
+                        if (account.role == "admin") {
+                            Button(
+                                onClick = onAdminPanelClick,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFECE4FF),
+                                    contentColor = Color(0xFF28194A)
+                                )
+                            ) {
+                                Text("Admin Panel", fontWeight = FontWeight.SemiBold)
+                            }
                         }
                     }
+                } else {
+                    Text(
+                        text = "User not found",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color(0xFFFF9FAE),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp)
+                    )
                 }
-            } else {
-                Text(
-                    text = "User not found",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Red,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
