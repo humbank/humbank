@@ -6,16 +6,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.burnoo.compose.remembersetting.rememberStringSetting
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -37,20 +40,18 @@ import org.scrobotic.humbank.screens.SettingsScreen
 import org.scrobotic.humbank.screens.UserProfileScreen
 import org.scrobotic.humbank.screens.SearchScreen
 import org.scrobotic.humbank.screens.TransactionInputScreen
+import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.HumbankUITheme
 import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
+import org.scrobotic.humbank.ui.humbankPalette
 import kotlin.time.ExperimentalTime
-
 
 @OptIn(ExperimentalTime::class)
 @Composable
 fun App(navigator: Navigator, database: Database) {
 
     val scope = rememberCoroutineScope()
-
     val httpClient = createNetworkClient()
-
-
 
     var token by rememberStringSetting("token", "")
     var username by rememberStringSetting("username", "")
@@ -65,20 +66,13 @@ fun App(navigator: Navigator, database: Database) {
         )
     }
 
-
-
-
-    val apiService = ApiServiceImpl(
-        httpClient = httpClient,
-        baseUrl = "https://humbank.cv"
-    )
-
+    val apiService = ApiServiceImpl(httpClient = httpClient, baseUrl = "https://humbank.cv")
     val apiRepository: ApiRepository = ApiRepositoryImpl(apiService)
-
     val repo = AccountRepository(database)
     val transactions = remember { mutableStateListOf<Transaction>() }
 
     HumbankUITheme {
+        val palette = humbankPalette()
         val localization = koinInject<Localization>()
         var languageIso by rememberStringSetting(
             key = "savedLanguageIso",
@@ -91,37 +85,48 @@ fun App(navigator: Navigator, database: Database) {
             Language.entries.first { it.iso == languageIso }
         }
 
-        Scaffold(bottomBar = {
-            if (navigator.current !is Screen.Login && navigator.current !is Screen.TransactionInput && navigator.current !is Screen.AdminPanel) {
-                BottomNavigationBar(
-                    onHomeClicked = {
-                        userSession?.let {
-                            navigator.replace(Screen.Home(it))
-                        }
-                    },
-                    onSettingsClicked = { navigator.push(Screen.Settings) },
-                    onNotificationsClicked = { navigator.push(Screen.Search) },
-                    onAccountClicked = { navigator.push(Screen.UserProfile) }
-                )
+        // Determine selected nav index for highlighting
+        val selectedNavIndex = when (navigator.current) {
+            is Screen.Home -> 0
+            is Screen.Search -> 1
+            is Screen.Settings -> 2
+            is Screen.UserProfile -> 3
+            else -> 0
+        }
+
+        Scaffold(
+            containerColor = palette.gradientTop,
+            bottomBar = {
+                val showNav = navigator.current !is Screen.Login &&
+                        navigator.current !is Screen.TransactionInput &&
+                        navigator.current !is Screen.AdminPanel
+
+                if (showNav) {
+                    BottomNavigationBar(
+                        selectedIndex = selectedNavIndex,
+                        onHomeClicked = {
+                            userSession?.let { navigator.replace(Screen.Home(it)) }
+                        },
+                        onSettingsClicked = { navigator.push(Screen.Settings) },
+                        onNotificationsClicked = { navigator.push(Screen.Search) },
+                        onAccountClicked = { navigator.push(Screen.UserProfile) }
+                    )
+                }
             }
-        }) { innerPadding ->
+        ) { innerPadding ->
             when (val screen = navigator.current) {
 
                 is Screen.Home -> HomeScreen(
                     userSession = screen.userSession,
                     contentPadding = innerPadding,
-                    onNavigateToProfile = { username ->
-                        val account = repo.getAccount(username)
+                    onNavigateToProfile = { uname ->
+                        val account = repo.getAccount(uname)
                         navigator.push(Screen.Profile(receiverAccount = account))
                     },
                     onTokenInvalid = {
                         token = ""
                         username = ""
-
-                        // Clear session
                         userSession = null
-
-                        // Navigate to login
                         navigator.replace(Screen.Login)
                     },
                     repo = repo,
@@ -133,24 +138,18 @@ fun App(navigator: Navigator, database: Database) {
                     onBack = { navigator.pop() },
                     account = userSession?.let { repo.getAccount(it.username) },
                     onLogout = {
-                        // Clear saved credentials
                         token = ""
                         username = ""
-
-                        // Clear session
                         userSession = null
-
-                        // Navigate to login
                         navigator.replace(Screen.Login)
-
                     },
-                    onAdminPanelClick = { navigator.push(Screen.AdminPanel)  }
+                    onAdminPanelClick = { navigator.push(Screen.AdminPanel) }
                 )
 
                 Screen.Settings -> SettingsScreen(
                     language = selectedLanguage,
-                    onLanguageChange = { selectedLanguage ->
-                        languageIso = selectedLanguage.iso
+                    onLanguageChange = { lang ->
+                        languageIso = lang.iso
                         localization.applyLanguage(languageIso)
                     },
                     onBack = { navigator.pop() }
@@ -158,28 +157,18 @@ fun App(navigator: Navigator, database: Database) {
 
                 Screen.Search -> SearchScreen(
                     repository = repo,
-                    onNavigateToAccount = { username ->
-                        navigator.push(Screen.Profile(receiverAccount = repo.getAccount(username)))
+                    onNavigateToAccount = { uname ->
+                        navigator.push(Screen.Profile(receiverAccount = repo.getAccount(uname)))
                     }
                 )
 
                 is Screen.Profile -> ProfileScreen(
                     receiverAccount = screen.receiverAccount,
-                    onTransaction = { receiverAccount ->
-                        userSession?.let { session ->
-                            val senderAccount = repo.getAccount(session.username)
-                            if (senderAccount != null) {
-                                navigator.push(
-                                    Screen.TransactionInput(
-                                        receiverAccount = receiverAccount,
-                                        senderAccount = senderAccount
-                                    )
-                                )
-                            }
-                        }
-                    },
+                    senderAccount = userSession?.let { repo.getAccount(it.username) },
+                    currentBalance = 0.0,
+                    apiRepository = apiRepository,
+                    onTransactionSuccess = { navigator.pop() },
                     onBack = { navigator.pop() }
-
                 )
 
                 is Screen.TransactionInput -> TransactionInputScreen(
@@ -189,14 +178,11 @@ fun App(navigator: Navigator, database: Database) {
                     apiRepository = apiRepository,
                     onNavigateBack = { navigator.pop() },
                     onTransactionSuccess = {
-                        // Reload transactions after successful transfer
                         scope.launch {
                             try {
                                 val updatedTransactions = apiRepository.getTodaysTransactions()
                                 transactions.clear()
                                 transactions.addAll(updatedTransactions)
-
-                                // Reload accounts to update balances
                                 val allAccounts = apiRepository.getAllAccounts()
                                 repo.syncAccounts(allAccounts)
                             } catch (e: Exception) {
@@ -207,9 +193,7 @@ fun App(navigator: Navigator, database: Database) {
                 )
 
                 Screen.Login -> LoginScreen(
-                    onLogin = { username, password ->
-                        apiRepository.login(username, password)
-                    },
+                    onLogin = { u, p -> apiRepository.login(u, p) },
                     onLoginSuccess = { session ->
                         userSession = session
                         navigator.replace(Screen.Home(session))
@@ -220,7 +204,6 @@ fun App(navigator: Navigator, database: Database) {
                     var isLoading by remember { mutableStateOf(true) }
                     var error by remember { mutableStateOf<String?>(null) }
 
-                    // Load accounts once when screen is first shown
                     LaunchedEffect(Unit) {
                         try {
                             repo.syncAccounts(apiRepository.getAllAccounts())
@@ -231,41 +214,66 @@ fun App(navigator: Navigator, database: Database) {
                         }
                     }
 
-                    // Show loading or error while data loads
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    } else if (error != null) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = error!!,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = {
-                                isLoading = true
-                                error = null
-                            }) {
-                                Text("Retry")
+                    HumbankGradientScreen {
+                        when {
+                            isLoading -> Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = palette.primaryButton,
+                                        strokeWidth = 2.5.dp
+                                    )
+                                    Text(
+                                        "Loading panel…",
+                                        color = palette.muted,
+                                        fontSize = 14.sp
+                                    )
+                                }
                             }
+
+                            error != null -> Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(
+                                        text = error ?: "Unknown error",
+                                        color = palette.errorText,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Button(
+                                        onClick = {
+                                            isLoading = true
+                                            error = null
+                                        },
+                                        shape = RoundedCornerShape(14.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = palette.primaryButton,
+                                            contentColor = palette.primaryButtonText
+                                        )
+                                    ) {
+                                        Text("Retry")
+                                    }
+                                }
+                            }
+
+                            else -> AdminPanelScreen(
+                                apiRepository = apiRepository,
+                                onBack = { navigator.pop() }
+                            )
                         }
-                    } else {
-                        AdminPanelScreen(
-                            apiRepository = apiRepository,
-                            onBack = { navigator.pop() }
-                        )
                     }
                 }
-
             }
         }
     }

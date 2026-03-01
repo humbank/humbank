@@ -1,99 +1,222 @@
 package org.scrobotic.humbank.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import humbank.composeapp.generated.resources.Res
 import humbank.composeapp.generated.resources.user_transaction
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.data.AllAccount
+import org.scrobotic.humbank.data.generateRandomId
+import org.scrobotic.humbank.screens.home.components.TransactionInputPopup
 import org.scrobotic.humbank.ui.HumbankGradientScreen
-import org.scrobotic.humbank.ui.HumbankPanelCard
+import org.scrobotic.humbank.ui.humbankPalette
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowBack
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Unit, onBack: () -> Unit) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Profile") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        HumbankGradientScreen(modifier = Modifier.padding(padding)) {
-            HumbankPanelCard(
+fun ProfileScreen(
+    receiverAccount: AllAccount,
+    senderAccount: AllAccount?,
+    currentBalance: Double,
+    apiRepository: ApiRepository,
+    onTransactionSuccess: () -> Unit,
+    onBack: () -> Unit
+) {
+    val palette = humbankPalette()
+    val scope = rememberCoroutineScope()
+
+    var showTransferDialog by remember { mutableStateOf(false) }
+    var isTransferLoading by remember { mutableStateOf(false) }
+
+    HumbankGradientScreen {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .statusBarsPadding()
+        ) {
+            // Back button
+            IconButton(
+                onClick = onBack,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .align(Alignment.TopCenter)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(palette.cardSurface)
             ) {
-                Column(
+                Icon(ArrowBack, contentDescription = "Back", tint = palette.title, modifier = Modifier.size(20.dp))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Avatar + name
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .size(88.dp)
+                        .clip(CircleShape)
+                        .background(palette.primaryButton.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(96.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF4B3D72)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = receiverAccount.full_name.firstOrNull()?.toString() ?: "?",
-                            color = Color.White,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = receiverAccount.full_name.firstOrNull()?.toString()?.uppercase() ?: "?",
+                        color = palette.primaryButton,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
-                    Text(receiverAccount.full_name, style = MaterialTheme.typography.titleLarge, color = Color.White)
-                    Text("@${receiverAccount.username}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFAFA6D4))
+                Text(
+                    text = receiverAccount.full_name,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = palette.title,
+                    letterSpacing = (-0.4).sp
+                )
+                Text(
+                    text = "@${receiverAccount.username}",
+                    fontSize = 14.sp,
+                    color = palette.muted
+                )
 
-                    Button(
-                        onClick = { onTransaction(receiverAccount) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFECE4FF),
-                            contentColor = Color(0xFF28194A)
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = palette.primaryButton.copy(alpha = 0.12f)
+                ) {
+                    Text(
+                        receiverAccount.role.uppercase(),
+                        color = palette.primaryButton,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Info card
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = palette.cardSurface,
+                border = BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        colors = listOf(palette.cardStroke.copy(alpha = 0.6f), palette.cardStroke.copy(alpha = 0.1f))
+                    )
+                ),
+                shadowElevation = 4.dp,
+                tonalElevation = 0.dp
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    ProfileDetailRow("Full name", receiverAccount.full_name, palette)
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = palette.cardStroke.copy(alpha = 0.4f), thickness = 0.5.dp)
+                    ProfileDetailRow("Username", "@${receiverAccount.username}", palette)
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = palette.cardStroke.copy(alpha = 0.4f), thickness = 0.5.dp)
+                    ProfileDetailRow("Account type", receiverAccount.role.replaceFirstChar { it.uppercase() }, palette)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Send money button
+            Button(
+                onClick = { showTransferDialog = true },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = palette.primaryButton,
+                    contentColor = palette.primaryButtonText
+                )
+            ) {
+                Text(
+                    stringResource(Res.string.user_transaction),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp
+                )
+            }
+        }
+    }
+
+    // Inline transfer popup — no navigation needed
+    if (showTransferDialog && senderAccount != null) {
+        TransactionInputPopup(
+            balance = currentBalance,
+            senderAccount = senderAccount,
+            prefilledReceiver = receiverAccount.username,
+            isLoading = isTransferLoading,
+            onDismiss = { showTransferDialog = false },
+            onSend = { amt, receiver, desc ->
+                isTransferLoading = true
+                scope.launch {
+                    try {
+                        val result = apiRepository.executeTransfer(
+                            issuerUsername = receiver,
+                            amount = amt,
+                            transactionId = "tx_${generateRandomId()}",
+                            description = desc
                         )
-                    ) {
-                        Text(stringResource(Res.string.user_transaction), fontWeight = FontWeight.SemiBold)
+                        showTransferDialog = false
+                        if (result) onTransactionSuccess()
+                    } finally {
+                        isTransferLoading = false
                     }
                 }
             }
-        }
+        )
+    }
+}
+
+@Composable
+private fun ProfileDetailRow(label: String, value: String, palette: org.scrobotic.humbank.ui.HumbankPalette) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, fontSize = 13.sp, color = palette.muted, fontWeight = FontWeight.Medium)
+        Text(value, fontSize = 13.sp, color = palette.title, fontWeight = FontWeight.SemiBold)
     }
 }

@@ -1,14 +1,18 @@
 package org.scrobotic.humbank.screens.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,6 +44,9 @@ import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.data.generateRandomId
 import org.scrobotic.humbank.screens.home.components.TransactionInputPopup
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
@@ -54,6 +61,7 @@ fun HomeScreen(
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val palette = humbankPalette()
 
     var account by remember { mutableStateOf<AllAccount?>(null) }
     var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
@@ -61,68 +69,48 @@ fun HomeScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var currentBalance by remember { mutableStateOf(0.0) }
 
-    // Transaction dialog state
     var showTransactionDialog by remember { mutableStateOf(false) }
     var showAllTransactions by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
     val sheetState = rememberModalBottomSheetState()
     var isTransactionLoading by remember { mutableStateOf(false) }
-
     var refreshTrigger by remember { mutableIntStateOf(0) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(refreshTrigger) {
         try {
-            // Start loading
             if (refreshTrigger > 0) isTransactionLoading = true
-
+            if (refreshTrigger > 0) isRefreshing = true
             val balanceResult = apiRepository.getBalance()
             if (!coroutineContext.isActive) return@LaunchedEffect
-
             val transactionsResult = apiRepository.getTodaysTransactions()
-
             if (!coroutineContext.isActive) return@LaunchedEffect
-
             currentBalance = balanceResult
             transactions = transactionsResult.sortedByDescending { it.transaction_date }
         } catch (e: Exception) {
-            // If it's a cancellation exception, don't show an error
             if (e is kotlinx.coroutines.CancellationException) throw e
-            println("DEBUG: Refresh failed: ${e.message}")
         } finally {
-            // Only reset loading if we are still on this screen
-            if (coroutineContext.isActive) {
-                isTransactionLoading = false
-            }
+            if (coroutineContext.isActive) isTransactionLoading = false
+            if (coroutineContext.isActive) isRefreshing = false
         }
     }
 
-    // Load data on first composition
     LaunchedEffect(userSession.username) {
         try {
             isLoading = true
             errorMessage = null
-
             val isTokenValid = apiRepository.validateToken()
-            if (!isTokenValid) {
-                onTokenInvalid()
-            }
-
+            if (!isTokenValid) { onTokenInvalid() }
             val latestTime = repo.getLatestTime()
             val updatedAccounts = if (latestTime != null) {
                 apiRepository.updateAccounts(latestTime)
             } else {
-                println("DEBUG: No cached data, fetching all accounts")
                 apiRepository.getAllAccounts()
             }
             repo.syncAccounts(updatedAccounts)
-
             account = repo.getAccount(userSession.username)
-            println("DEBUG: Found account: ${account?.username}")
-
-            transactions = apiRepository.getTodaysTransactions()
-                .sortedByDescending { it.transaction_date }
-            println("DEBUG: Loaded ${transactions.size} transactions")
-
+            transactions = apiRepository.getTodaysTransactions().sortedByDescending { it.transaction_date }
             isLoading = false
         } catch (e: Exception) {
             errorMessage = "Failed to load data: ${e.message}"
@@ -133,233 +121,297 @@ fun HomeScreen(
 
     LaunchedEffect(account) {
         if (account != null) {
-            try {
-                currentBalance = apiRepository.getBalance()
-                println("DEBUG: Current balance loaded: $currentBalance")
-            } catch (e: Exception) {
-                println("DEBUG: Failed to load balance")
-            }
+            try { currentBalance = apiRepository.getBalance() } catch (e: Exception) {}
         }
     }
 
-    // Show loading state
     if (isLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
+            modifier = Modifier.fillMaxSize().padding(contentPadding),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = palette.primaryButton, strokeWidth = 2.5.dp)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Loading...", color = MaterialTheme.colorScheme.onBackground)
+                Text("Loading…", color = palette.muted, fontSize = 14.sp)
             }
         }
         return
     }
 
-    // Show error state
     if (errorMessage != null) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
+            modifier = Modifier.fillMaxSize().padding(contentPadding),
             contentAlignment = Alignment.Center
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(32.dp)
             ) {
-                Text(
-                    text = "Error",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.error
-                )
+                Text("Something went wrong", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = palette.title)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = errorMessage ?: "Unknown error",
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {
-                    scope.launch {
-                        isLoading = true
-                        errorMessage = null
-                        try {
-                            account = repo.getAccount(userSession.username)
-                            transactions = apiRepository.getTodaysTransactions()
-                                .sortedByDescending { it.transaction_date }
-                            isLoading = false
-                        } catch (e: Exception) {
-                            errorMessage = "Failed to load data: ${e.message}"
-                            isLoading = false
+                Text(errorMessage ?: "Unknown error", color = palette.muted, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(20.dp))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isLoading = true
+                            errorMessage = null
+                            try {
+                                account = repo.getAccount(userSession.username)
+                                transactions = apiRepository.getTodaysTransactions().sortedByDescending { it.transaction_date }
+                                isLoading = false
+                            } catch (e: Exception) {
+                                errorMessage = "Failed to load data: ${e.message}"
+                                isLoading = false
+                            }
                         }
-                    }
-                }) {
-                    Text("Retry")
+                    },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = palette.primaryButton, contentColor = palette.primaryButtonText)
+                ) {
+                    Text("Try again")
                 }
             }
         }
         return
     }
 
-    // Show account not found state
     if (account == null) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
+            modifier = Modifier.fillMaxSize().padding(contentPadding),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Account not found",
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 18.sp
-            )
+            Text("Account not found", color = palette.errorText, fontSize = 16.sp)
         }
         return
     }
 
-    // Calculate financial metrics
-    val incomingSum = transactions
-        .filter { it.receiver == account!!.username }
-        .sumOf { it.amount }
-
-    val outgoingSum = transactions
-        .filter { it.sender == account!!.username }
-        .sumOf { it.amount }
-
+    val incomingSum = transactions.filter { it.receiver == account!!.username }.sumOf { it.amount }
+    val outgoingSum = transactions.filter { it.sender == account!!.username }.sumOf { it.amount }
     val networthSum = incomingSum - outgoingSum
-    val transactionsToShow = if (showAllTransactions) {
-        transactions
-    } else {
-        transactions.take(5)
-    }
+    val transactionsToShow = if (showAllTransactions) transactions else transactions.take(5)
 
-    // MAIN CONTENT - NO SCAFFOLD
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(
-                PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = contentPadding.calculateTopPadding() + 16.dp,
-                    bottom = contentPadding.calculateBottomPadding() + 16.dp
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(palette.gradientTop, palette.gradientMiddle, palette.gradientBottom)
                 )
-            ),
+            )
+    ) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                refreshTrigger++
+            },
+            modifier = Modifier.fillMaxSize(),
+            state = pullToRefreshState,
+            indicator = {
+                PullToRefreshDefaults.Indicator(
+                    state = pullToRefreshState,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    containerColor = palette.cardSurface,
+                    color = palette.primaryButton
+                )
+            }
+        ) {
+            // Your content
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = contentPadding.calculateTopPadding() + 8.dp,
+            bottom = contentPadding.calculateBottomPadding() + 24.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // ✅ HEADER WITH SEND BUTTON - TOP RIGHT
+        // Header
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(Res.string.dashboard_title),
-                        fontSize = 24.sp,
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = palette.title,
+                        letterSpacing = (-0.5).sp
                     )
                     Text(
                         text = "${stringResource(Res.string.greeting)} ${account!!.full_name}",
-                        color = Color.Gray,
-                        fontSize = 14.sp
+                        color = palette.muted,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
                     )
                 }
-                // ✅ SEND BUTTON - SIMPLE ICONBUTTON LIKE BEFORE
-                IconButton(
-                    onClick = { showTransactionDialog = true },
-                    modifier = Modifier.size(48.dp)
+
+                // Send button — elevated circular FAB style
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .background(palette.primaryButton, CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Send,
-                        contentDescription = "Überweisen",
-                        tint = Color(0xFFE91E63),
-                        modifier = Modifier.size(24.dp)
-                    )
+                    IconButton(
+                        onClick = { showTransactionDialog = true },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            Send,
+                            contentDescription = "Send",
+                            tint = palette.primaryButtonText,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
 
-        // Balance Card
+        // Premium balance card
         item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(24.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                color = Color.Transparent,
+                border = BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            palette.cardStroke.copy(alpha = 0.9f),
+                            palette.cardStroke.copy(alpha = 0.1f)
+                        )
+                    )
+                )
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = stringResource(Res.string.balance_title),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 12.sp
-                    )
-                    Text(
-                        text = "${currentBalance.formatCurrency()} HMB",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = "Account ID: ${account!!.username}",
-                        color = Color.Gray,
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    InfoCard(
-                        label = stringResource(Res.string.networth),
-                        value = "${if (networthSum > 0) "+" else ""}${networthSum.formatCurrency()} HMB",
-                        color = if (networthSum > 0) GreenStart else Pink40,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(palette.cardSurface, palette.cardSurface.copy(alpha = 0.9f))
+                            ),
+                            RoundedCornerShape(28.dp)
+                        )
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(
+                            text = stringResource(Res.string.balance_title).uppercase(),
+                            color = palette.muted,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                text = currentBalance.formatCurrency(),
+                                fontSize = 40.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = palette.title,
+                                letterSpacing = (-1).sp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "HMB",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = palette.muted,
+                                modifier = Modifier.padding(bottom = 6.dp),
+                                letterSpacing = 1.sp
+                            )
+                        }
+
+                        Text(
+                            text = "@${account!!.username}",
+                            color = palette.muted,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Net worth pill
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (networthSum >= 0) Color(0xFF22C55E).copy(alpha = 0.12f) else Color(0xFFF43F5E).copy(alpha = 0.12f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.networth).uppercase(),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = palette.muted,
+                                    letterSpacing = 0.8.sp
+                                )
+                                Text(
+                                    text = "${if (networthSum > 0) "+" else ""}${networthSum.formatCurrency()} HMB",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (networthSum >= 0) Color(0xFF22C55E) else Color(0xFFF43F5E)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // Income/Expense Cards
+        // Income / Expense summary
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 InfoCard(
                     label = stringResource(Res.string.incomes),
                     value = "+${incomingSum.formatCurrency()} HMB",
-                    color = GreenStart,
+                    color = Color(0xFF22C55E),
                     modifier = Modifier.weight(1f)
                 )
                 InfoCard(
                     label = stringResource(Res.string.expenses),
-                    value = "-${outgoingSum.formatCurrency()} HMB",
-                    color = Pink40,
+                    value = "−${outgoingSum.formatCurrency()} HMB",
+                    color = Color(0xFFF43F5E),
                     modifier = Modifier.weight(1f)
                 )
             }
         }
 
-        // Balance Chart
+        // Balance chart section
         item {
-            Text(
-                text = stringResource(Res.string.running_chart_title),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            BalanceLineChart(
-                transactions.take(5),
-                accountId = account!!.username,
-                currentBalance = currentBalance
-            )
+            Column {
+                Text(
+                    text = stringResource(Res.string.running_chart_title),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = palette.title,
+                    letterSpacing = (-0.2).sp,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+                BalanceLineChart(
+                    transactions.take(5),
+                    accountId = account!!.username,
+                    currentBalance = currentBalance
+                )
+            }
         }
 
-        // Transactions List
+        // Transactions header
         item {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -367,57 +419,103 @@ fun HomeScreen(
                     Text(
                         text = stringResource(Res.string.last_transactions_title),
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        fontSize = 16.sp,
+                        color = palette.title,
+                        letterSpacing = (-0.2).sp
                     )
                     if (transactions.size > 5) {
                         Text(
-                            text = "Showing ${transactionsToShow.size} of ${transactions.size}",
-                            color = Color.Gray,
+                            text = "${transactionsToShow.size} of ${transactions.size} shown",
+                            color = palette.muted,
                             fontSize = 12.sp
                         )
                     }
                 }
-
                 if (transactions.size > 5) {
                     TextButton(
-                        onClick = { showAllTransactions = !showAllTransactions }
+                        onClick = { showAllTransactions = !showAllTransactions },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.textButtonColors(contentColor = palette.primaryButton)
                     ) {
                         Text(
-                            text = if (showAllTransactions) "Show Less" else "Show More",
-                            fontSize = 14.sp
+                            text = if (showAllTransactions) "Show less" else "See all",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
             }
         }
 
-        items(transactionsToShow) { tx ->
-            TransactionRow(
-                tx = tx,
-                accountId = account!!.username,
-                onClick = { selectedTransaction = tx }
-            )
+        // Transaction list inside a single card
+        item {
+            if (transactionsToShow.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(palette.cardSurface)
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No transactions yet", color = palette.muted, fontSize = 14.sp)
+                }
+            } else {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    color = palette.cardSurface,
+                    border = BorderStroke(
+                        1.dp,
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                palette.cardStroke.copy(alpha = 0.6f),
+                                palette.cardStroke.copy(alpha = 0.1f)
+                            )
+                        )
+                    ),
+                    shadowElevation = 4.dp,
+                    tonalElevation = 0.dp
+                ) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        transactionsToShow.forEachIndexed { index, tx ->
+                            TransactionRow(
+                                tx = tx,
+                                accountId = account!!.username,
+                                onClick = { selectedTransaction = tx }
+                            )
+                            if (index < transactionsToShow.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = palette.cardStroke.copy(alpha = 0.35f),
+                                    thickness = 0.5.dp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    // Snackbar - positioned manually
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding)
-    ) {
+    // Snackbar overlaid on the gradient Box
+    Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
+    } // end PullToRefreshBox
+    } // end gradient Box
 
-    // Transaction Detail Bottom Sheet
+    // Transaction detail bottom sheet
     selectedTransaction?.let { tx ->
         ModalBottomSheet(
             onDismissRequest = { selectedTransaction = null },
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = palette.panel,
+            dragHandle = null,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         ) {
             TransactionDetailContent(
                 accountId = account!!.username,
@@ -427,7 +525,7 @@ fun HomeScreen(
         }
     }
 
-    // Transaction Dialog
+    // Transfer dialog
     if (showTransactionDialog && account != null) {
         isTransactionLoading = false
         TransactionInputPopup(
@@ -438,25 +536,19 @@ fun HomeScreen(
             onSend = { amt, receiver, desc ->
                 isTransactionLoading = true
                 scope.launch {
-                        val result = apiRepository.executeTransfer(
-                            issuerUsername = receiver,
-                            amount = amt,
-                            transactionId = "tx_${generateRandomId()}",
-                            description = desc
-                        )
-
-                        showTransactionDialog = false
-
-                        if(result)
-                        {
-
-                            snackbarHostState.showSnackbar("Überweisung erfolgreich!")
-                            refreshTrigger++
-                        }
-                        else{
-                            snackbarHostState.showSnackbar("Überweisung fehlgeschlagen, falscher Name?")
-                        }
-
+                    val result = apiRepository.executeTransfer(
+                        issuerUsername = receiver,
+                        amount = amt,
+                        transactionId = "tx_${generateRandomId()}",
+                        description = desc
+                    )
+                    showTransactionDialog = false
+                    if (result) {
+                        snackbarHostState.showSnackbar("Transfer successful!")
+                        refreshTrigger++
+                    } else {
+                        snackbarHostState.showSnackbar("Transfer failed — check the recipient username")
+                    }
                 }
             }
         )

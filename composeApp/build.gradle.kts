@@ -40,6 +40,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
+            // In build.gradle.kts
+            implementation("org.jetbrains.compose.material3:material3:1.9.0") // or higher
+
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             implementation(compose.runtime)
             implementation(compose.foundation)
