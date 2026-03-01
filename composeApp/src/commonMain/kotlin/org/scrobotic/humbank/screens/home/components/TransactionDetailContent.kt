@@ -1,17 +1,9 @@
 package org.scrobotic.humbank.screens.home.components
 
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -21,71 +13,88 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import humbank.composeapp.generated.resources.Res
 import humbank.composeapp.generated.resources.close_btn
+import humbank.composeapp.generated.resources.tx_completed
 import humbank.composeapp.generated.resources.tx_description
 import humbank.composeapp.generated.resources.tx_receiverID
 import humbank.composeapp.generated.resources.tx_senderID
 import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.formatCurrency
+import org.scrobotic.humbank.ui.Blue
 import org.scrobotic.humbank.ui.GreenStart
 import org.scrobotic.humbank.ui.Pink40
 import org.scrobotic.humbank.ui.elements.icons.processed.ReceiptLong
-import org.scrobotic.humbank.ui.humbankPalette
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 @Composable
 fun TransactionDetailContent(accountId: String?, transaction: Transaction, onClose: () -> Unit) {
     val isIncoming = transaction.receiver == accountId
-    val palette = humbankPalette()
-
     Column(
-        modifier = Modifier.fillMaxWidth().padding(24.dp).navigationBarsPadding(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)
+            .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Icon / Status
         Box(
-            modifier = Modifier.size(64.dp).background(palette.inputFillFocused, CircleShape),
+            modifier = Modifier
+                .size(64.dp)
+                .background(Color.Blue.copy(alpha = 0.05f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(ReceiptLong, contentDescription = null, tint = palette.primaryButtonText, modifier = Modifier.size(32.dp))
+            Icon(ReceiptLong, contentDescription = null, tint = Blue, modifier = Modifier.size(32.dp))
         }
 
-        Spacer(modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // Large Amount
         Text(
             text = if (isIncoming) "+${transaction.amount.formatCurrency()} HMB" else "-${transaction.amount.formatCurrency()} HMB",
-            fontSize = 32.sp,
+            fontSize = 36.sp,
             fontWeight = FontWeight.ExtraBold,
             color = if (isIncoming) GreenStart else Pink40
         )
+        Text(transaction.transaction_date.toString(), color = Color.Gray, fontSize = 14.sp)
+        Text(transaction.id, color = Color.Gray, fontSize = 14.sp)
 
-        Spacer(modifier = Modifier.size(8.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray.copy(alpha = 0.2f))
 
-        InfoRow(stringResource(Res.string.tx_senderID), transaction.sender, palette)
-        InfoRow(stringResource(Res.string.tx_receiverID), transaction.receiver, palette)
-        InfoRow(stringResource(Res.string.tx_description), transaction.description, palette)
+        // Data Grid Blueprint
+        DetailItem(label = stringResource(Res.string.tx_description), value = transaction.description)
+        DetailItem(label = stringResource(Res.string.tx_senderID), value = transaction.sender)
+        DetailItem(label = stringResource(Res.string.tx_receiverID), value = transaction.receiver)
+        DetailItem(label = "Status", value = stringResource(Res.string.tx_completed))
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = palette.panelStroke)
+        Spacer(modifier = Modifier.height(32.dp))
 
+        // Action Button
         Button(
             onClick = onClose,
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = palette.primaryButton, contentColor = palette.primaryButtonText)
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text(stringResource(Res.string.close_btn), fontWeight = FontWeight.SemiBold)
+            Text(stringResource(Res.string.close_btn), color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }
 
 @Composable
-private fun InfoRow(label: String, value: String, palette: org.scrobotic.humbank.ui.HumbankPalette) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = palette.subtitle)
-        Text(value, style = MaterialTheme.typography.bodyMedium, color = palette.title)
+fun DetailItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, color = Color.Gray, fontSize = 14.sp)
+        Text(value, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium, fontSize = 14.sp)
     }
 }
