@@ -32,7 +32,7 @@ fun HumbankGradientScreen(
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(HumbankTopGradient, HumbankMiddleGradient, HumbankBottomGradient)
+                    colors = listOf(palette.gradientTop, palette.gradientMiddle, palette.gradientBottom)
                 )
             ),
         content = content

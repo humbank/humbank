@@ -48,6 +48,7 @@ fun LoginScreen(
     var error by remember { mutableStateOf<String?>(null) }
 
     val scope = rememberCoroutineScope()
+    val palette = humbankPalette()
 
     HumbankGradientScreen(
         modifier = Modifier
