@@ -42,7 +42,6 @@ fun UserProfileScreen(
     onLogout: () -> Unit,
     onAdminPanelClick: () -> Unit
 ) {
-    val palette = humbankPalette()
     Scaffold(
         topBar = {
             TopAppBar(

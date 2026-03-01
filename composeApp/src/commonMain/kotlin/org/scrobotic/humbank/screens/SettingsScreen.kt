@@ -29,7 +29,6 @@ import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDropDown
 @Composable
 fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onBack: () -> Boolean) {
     var expanded by remember { mutableStateOf(false) }
-    val palette = humbankPalette()
 
     HumbankGradientScreen {
         HumbankPanelCard(
