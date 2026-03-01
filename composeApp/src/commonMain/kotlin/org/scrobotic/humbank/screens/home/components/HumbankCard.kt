@@ -8,20 +8,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.scrobotic.humbank.ui.humbankPalette
 
 @Composable
 fun HumbankCard(content: @Composable () -> Unit) {
+    val palette = humbankPalette()
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp), // They use very rounded corners
-        color = Color(0xFF1A1C1E), // base-200 in their dark theme
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)), // border-base-300
-        shadowElevation = 8.dp
+        shape = RoundedCornerShape(24.dp),
+        color = palette.inputFillUnfocused,
+        border = BorderStroke(1.dp, palette.panelStroke),
+        shadowElevation = 6.dp
     ) {
-        Column(Modifier.padding(24.dp)) {
-            content()
-        }
+        Column(Modifier.padding(20.dp)) { content() }
     }
 }

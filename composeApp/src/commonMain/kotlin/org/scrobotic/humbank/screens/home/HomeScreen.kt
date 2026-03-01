@@ -54,6 +54,7 @@ fun HomeScreen(
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val palette = humbankPalette()
 
     var account by remember { mutableStateOf<AllAccount?>(null) }
     var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
@@ -242,7 +243,7 @@ fun HomeScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            
             .padding(
                 PaddingValues(
                     start = 16.dp,
@@ -266,7 +267,7 @@ fun HomeScreen(
                     )
                     Text(
                         text = "${stringResource(Res.string.greeting)} ${account!!.full_name}",
-                        color = Color.Gray,
+                        color = palette.subtitle,
                         fontSize = 14.sp
                     )
                 }
@@ -278,7 +279,7 @@ fun HomeScreen(
                     Icon(
                         Send,
                         contentDescription = "Überweisen",
-                        tint = Color(0xFFE91E63),
+                        tint = palette.primaryButton,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -306,7 +307,7 @@ fun HomeScreen(
                     )
                     Text(
                         text = "Account ID: ${account!!.username}",
-                        color = Color.Gray,
+                        color = palette.subtitle,
                         fontSize = 10.sp,
                         modifier = Modifier.padding(top = 8.dp)
                     )
@@ -372,7 +373,7 @@ fun HomeScreen(
                     if (transactions.size > 5) {
                         Text(
                             text = "Showing ${transactionsToShow.size} of ${transactions.size}",
-                            color = Color.Gray,
+                            color = palette.subtitle,
                             fontSize = 12.sp
                         )
                     }

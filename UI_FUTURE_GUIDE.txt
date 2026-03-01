@@ -1,0 +1,67 @@
+Humbank UI Future Additions Guide
+================================
+
+Goal
+----
+Keep every new UI surface consistent with the premium dark-purple style used by the login, profile, settings, and search screens.
+
+Core Style Rules
+----------------
+1) Always start full-screen pages with `HumbankGradientScreen`.
+2) Put primary page content inside `HumbankPanelCard` when possible.
+3) Prefer rounded corners:
+   - Containers: 24dp to 28dp
+   - Inputs/buttons: 12dp to 14dp
+4) Keep spacing regular:
+   - Outer page padding: 16dp to 24dp
+   - Vertical gaps inside cards: 10dp to 16dp
+5) Typography hierarchy:
+   - Section label: subtle muted color
+   - Main title: white, semibold
+   - Support text: desaturated purple text
+
+Color Guidance
+--------------
+- Background gradient: use shared values from `ui/AppStyle.kt`.
+- Main text: white.
+- Secondary text: muted lilac (e.g. #AFA6D4 / #9A92BE range).
+- Primary action button: light-lilac background with dark purple text.
+- Error text: soft red/pink on translucent dark red background.
+
+Component Rules
+---------------
+- Text fields:
+  - Use rounded shape.
+  - Use subtle translucent fill.
+  - Distinguish focused/unfocused borders.
+- Buttons:
+  - Full-width for major actions.
+  - Keep action labels short and clear.
+  - Provide disabled colors with enough contrast.
+- Empty/error states:
+  - Keep concise, centered, and styled consistently.
+
+Behavior & UX Checklist
+-----------------------
+- [ ] Loading states exist for async actions.
+- [ ] Buttons are disabled while loading.
+- [ ] Error messages are human-friendly.
+- [ ] Layout works at narrow widths.
+- [ ] Text remains readable in dark mode.
+- [ ] Navigation icons/descriptions are present.
+
+Code Hygiene Checklist
+----------------------
+- [ ] Reuse shared styles/composables before creating one-off variants.
+- [ ] Avoid inline magic numbers unless they match this design system.
+- [ ] Remove debug logs before merging.
+- [ ] Keep composables focused and readable.
+
+If a New Screen Feels "Off"
+----------------------------
+Check these first:
+1) Missing gradient or panel card.
+2) Inconsistent corner radii.
+3) Wrong text contrast.
+4) Uneven spacing rhythm.
+5) Action buttons not visually prioritized.

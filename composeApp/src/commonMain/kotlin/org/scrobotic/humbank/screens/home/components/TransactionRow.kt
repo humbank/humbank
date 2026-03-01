@@ -21,11 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.data.formatCurrency
-import org.scrobotic.humbank.ui.Gray
 import org.scrobotic.humbank.ui.GreenStart
 import org.scrobotic.humbank.ui.Pink40
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDownward
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowUpward
+import org.scrobotic.humbank.ui.humbankPalette
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -33,31 +33,27 @@ import kotlin.time.ExperimentalTime
 fun TransactionRow(
     tx: Transaction,
     accountId: String?,
-    onClick: (Transaction) -> Unit // New parameter for click handling
+    onClick: (Transaction) -> Unit
 ) {
     val isIncoming = tx.receiver == accountId
+    val palette = humbankPalette()
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick(tx) }
-            .padding(vertical = 12.dp, horizontal = 16.dp), // Increased padding for better touch targets
+            .padding(vertical = 12.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(
-                    // Using GreenStart and Pink40 from your palette
-                    color = if (isIncoming) GreenStart.copy(alpha = 0.1f) else Pink40.copy(alpha = 0.1f),
-                    shape = CircleShape
-                ),
+                .background(color = if (isIncoming) GreenStart.copy(alpha = 0.14f) else Pink40.copy(alpha = 0.14f), shape = CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                // Assuming you have these icons available
-                imageVector = if(isIncoming) ArrowUpward else ArrowDownward,
+                imageVector = if (isIncoming) ArrowUpward else ArrowDownward,
                 contentDescription = null,
                 tint = if (isIncoming) GreenStart else Pink40,
                 modifier = Modifier.size(20.dp)
@@ -65,26 +61,15 @@ fun TransactionRow(
         }
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = tx.description,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = tx.transaction_date.toString(),
-                color = Gray, // Using Gray from your UI palette
-                fontSize = 12.sp
-            )
+            Text(text = tx.description, color = palette.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = tx.transaction_date.toString(), color = palette.subtitle, fontSize = 12.sp)
         }
 
         Text(
-            // Using your formatCurrency extension
             text = (if (isIncoming) "+" else "-") + tx.amount.formatCurrency(),
             color = if (isIncoming) GreenStart else Pink40,
             fontWeight = FontWeight.Bold,
-            fontSize = 15.sp
+            fontSize = 14.sp
         )
     }
 }
