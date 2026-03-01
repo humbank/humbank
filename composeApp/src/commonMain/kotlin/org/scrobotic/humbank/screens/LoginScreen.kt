@@ -30,7 +30,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.burnoo.compose.remembersetting.rememberStringSetting
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.login_failed
+import humbank.composeapp.generated.resources.login_password
+import humbank.composeapp.generated.resources.login_sign_in
+import humbank.composeapp.generated.resources.login_sign_in_account
+import humbank.composeapp.generated.resources.login_username
+import humbank.composeapp.generated.resources.login_welcome_back
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.HumbankPanelCard
@@ -50,6 +58,10 @@ fun LoginScreen(
 
     val scope = rememberCoroutineScope()
     val palette = humbankPalette()
+
+
+
+    val failed: String = stringResource(Res.string.login_failed)
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedContainerColor = palette.inputFillFocused,
@@ -91,7 +103,7 @@ fun LoginScreen(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "Welcome back",
+                    text = stringResource(Res.string.login_welcome_back),
                     style = MaterialTheme.typography.labelLarge,
                     color = palette.muted,
                     fontSize = 13.sp
@@ -100,7 +112,7 @@ fun LoginScreen(
                 Spacer(Modifier.height(4.dp))
 
                 Text(
-                    text = "Sign in to your account",
+                    text = stringResource(Res.string.login_sign_in_account),
                     style = MaterialTheme.typography.headlineSmall,
                     color = palette.title,
                     fontWeight = FontWeight.Bold,
@@ -113,7 +125,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username") },
+                    label = { Text(stringResource(Res.string.login_username)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = !isLoading,
@@ -126,7 +138,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text(stringResource(Res.string.login_password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -173,7 +185,7 @@ fun LoginScreen(
                                 savedUsername = session.username
                                 onLoginSuccess(session)
                             } catch (e: Exception) {
-                                error = e.message ?: "Login failed. Please try again."
+                                error = e.message ?: failed
                             } finally {
                                 isLoading = false
                             }
@@ -188,7 +200,7 @@ fun LoginScreen(
                         )
                     } else {
                         Text(
-                            "Sign in",
+                            stringResource(Res.string.login_sign_in),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )

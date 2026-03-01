@@ -46,8 +46,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.admin_account_created
+import humbank.composeapp.generated.resources.admin_accounts_count
+import humbank.composeapp.generated.resources.admin_back
+import humbank.composeapp.generated.resources.admin_creation_failed
+import humbank.composeapp.generated.resources.admin_new_account
+import humbank.composeapp.generated.resources.admin_no_accounts_found
+import humbank.composeapp.generated.resources.admin_no_matching_accounts
+import humbank.composeapp.generated.resources.admin_panel_title
+import humbank.composeapp.generated.resources.admin_search_accounts
 import kotlinx.coroutines.launch
 import org.humbank.ktorclient.icons.imagevectors.Account
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.screens.admin.components.CreateAccountDialog
@@ -75,6 +86,9 @@ fun AdminPanelScreen(
     var showCreateDialog by remember { mutableStateOf(false) }
     var isCreatingUser by remember { mutableStateOf(true) }
     var createLoading by remember { mutableStateOf(false) }
+
+    val success = stringResource(Res.string.admin_account_created)
+    val failure = stringResource(Res.string.admin_creation_failed)
 
     LaunchedEffect(Unit) {
         try {
@@ -119,21 +133,21 @@ fun AdminPanelScreen(
                         ) {
                             Icon(
                                 ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(Res.string.admin_back),
                                 tint = palette.title,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
                         Column {
                             Text(
-                                "Admin Panel",
+                                stringResource(Res.string.admin_panel_title),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = palette.title,
                                 letterSpacing = (-0.4).sp
                             )
                             Text(
-                                "${accounts.size} accounts",
+                                stringResource(Res.string.admin_accounts_count, accounts.size),
                                 color = palette.muted,
                                 fontSize = 13.sp
                             )
@@ -147,7 +161,7 @@ fun AdminPanelScreen(
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        label = { Text("Search accounts") },
+                        label = { Text(stringResource(Res.string.admin_search_accounts)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(16.dp),
@@ -184,7 +198,7 @@ fun AdminPanelScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                if (searchQuery.isNotEmpty()) "No matching accounts" else "No accounts found",
+                                if (searchQuery.isNotEmpty()) stringResource(Res.string.admin_no_matching_accounts) else stringResource(Res.string.admin_no_accounts_found),
                                 color = palette.muted
                             )
                         }
@@ -212,7 +226,7 @@ fun AdminPanelScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(Account, null, modifier = Modifier.size(18.dp))
-                Text("New Account", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text(stringResource(Res.string.admin_new_account), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             }
         }
 
@@ -250,10 +264,10 @@ fun AdminPanelScreen(
                         }
                         accounts = apiRepository.getAllAccounts()
                         showCreateDialog = false
-                        snackbarHostState.showSnackbar("Account created successfully")
+                        snackbarHostState.showSnackbar(success)
                     } catch (e: Exception) {
                         showCreateDialog = false
-                        snackbarHostState.showSnackbar(e.message ?: "Creation failed")
+                        snackbarHostState.showSnackbar(e.message ?: failure)
                     } finally {
                         createLoading = false
                     }

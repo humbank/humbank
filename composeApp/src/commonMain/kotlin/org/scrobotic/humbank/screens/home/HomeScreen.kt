@@ -29,6 +29,14 @@ import humbank.composeapp.generated.resources.incomes
 import humbank.composeapp.generated.resources.last_transactions_title
 import humbank.composeapp.generated.resources.networth
 import humbank.composeapp.generated.resources.running_chart_title
+import humbank.composeapp.generated.resources.home_try_again
+import humbank.composeapp.generated.resources.home_transfer_success
+import humbank.composeapp.generated.resources.home_transfer_failed_check_username
+import humbank.composeapp.generated.resources.home_send
+import humbank.composeapp.generated.resources.home_no_transactions
+import humbank.composeapp.generated.resources.home_loading
+import humbank.composeapp.generated.resources.home_error_title
+import humbank.composeapp.generated.resources.account_not_found
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.Transaction
@@ -77,6 +85,11 @@ fun HomeScreen(
     var refreshTrigger by remember { mutableIntStateOf(0) }
     var isRefreshing by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
+
+
+    val transfer_success = stringResource(Res.string.home_transfer_success)
+    val transfer_fail = stringResource(Res.string.home_transfer_failed_check_username)
+
 
     LaunchedEffect(refreshTrigger) {
         try {
@@ -133,7 +146,7 @@ fun HomeScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CircularProgressIndicator(color = palette.primaryButton, strokeWidth = 2.5.dp)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Loading…", color = palette.muted, fontSize = 14.sp)
+                Text(stringResource(Res.string.home_loading), color = palette.muted, fontSize = 14.sp)
             }
         }
         return
@@ -148,7 +161,7 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(32.dp)
             ) {
-                Text("Something went wrong", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = palette.title)
+                Text(stringResource(Res.string.home_error_title), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = palette.title)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(errorMessage ?: "Unknown error", color = palette.muted, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(20.dp))
@@ -170,7 +183,7 @@ fun HomeScreen(
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = palette.primaryButton, contentColor = palette.primaryButtonText)
                 ) {
-                    Text("Try again")
+                    Text(stringResource(Res.string.home_try_again))
                 }
             }
         }
@@ -182,7 +195,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize().padding(contentPadding),
             contentAlignment = Alignment.Center
         ) {
-            Text("Account not found", color = palette.errorText, fontSize = 16.sp)
+            Text(stringResource(Res.string.account_not_found), color = palette.errorText, fontSize = 16.sp)
         }
         return
     }
@@ -266,7 +279,7 @@ fun HomeScreen(
                     ) {
                         Icon(
                             Send,
-                            contentDescription = "Send",
+                            contentDescription = stringResource(Res.string.home_send),
                             tint = palette.primaryButtonText,
                             modifier = Modifier.size(20.dp)
                         )
@@ -458,7 +471,7 @@ fun HomeScreen(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No transactions yet", color = palette.muted, fontSize = 14.sp)
+                    Text(stringResource(Res.string.home_no_transactions), color = palette.muted, fontSize = 14.sp)
                 }
             } else {
                 Surface(
@@ -544,10 +557,10 @@ fun HomeScreen(
                     )
                     showTransactionDialog = false
                     if (result) {
-                        snackbarHostState.showSnackbar("Transfer successful!")
+                        snackbarHostState.showSnackbar(transfer_success)
                         refreshTrigger++
                     } else {
-                        snackbarHostState.showSnackbar("Transfer failed — check the recipient username")
+                        snackbarHostState.showSnackbar(transfer_fail)
                     }
                 }
             }

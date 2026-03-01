@@ -1,8 +1,8 @@
 <resources>
-    <string name="home_title">Zuhause</string>
+    <string name="home_title">Startseite</string>
     <string name="settings_title">Einstellungen</string>
-    <string name="notifications_title">Benachrichtigung</string>
-    <string name="account_title">Profil</string>
+    <string name="notifications_title">Benachrichtigungen</string>
+    <string name="account_title">Konto</string>
     <string name="change_language">Sprache ändern</string>
     <string name="greeting">Willkommen zurück, </string>
     <string name="dashboard_title">Banking-Dashboard</string>
@@ -13,10 +13,86 @@
     <string name="last_transactions_title">Letzte Transaktionen</string>
     <string name="balance_title">Kontostand</string>
     <string name="tx_description">Beschreibung</string>
-    <string name="tx_senderID">Sender ID</string>
-    <string name="tx_receiverID">Empfänger ID</string>
-    <string name="tx_completed">Completed</string>
+    <string name="tx_senderID">Sender-ID</string>
+    <string name="tx_receiverID">Empfänger-ID</string>
+    <string name="tx_completed">Abgeschlossen</string>
     <string name="close_btn">Schließen</string>
     <string name="search_placeholder">Suche nach Benutzernamen oder Namen...</string>
-    <string name="user_transaction">Sende Geld</string>
+    <string name="user_transaction">Geld senden</string>
+
+    <string name="retry">Erneut versuchen</string>
+    <string name="loading_panel">Panel wird geladen…</string>
+    <string name="unknown_error">Unbekannter Fehler</string>
+
+    <string name="login_welcome_back">Willkommen zurück</string>
+    <string name="login_sign_in_account">Melde dich bei deinem Konto an</string>
+    <string name="login_username">Benutzername</string>
+    <string name="login_password">Passwort</string>
+    <string name="login_failed">Anmeldung fehlgeschlagen. Bitte versuche es erneut.</string>
+    <string name="login_sign_in">Anmelden</string>
+
+    <string name="search_title">Suche</string>
+    <string name="search_subtitle">Finde Konten nach Name oder Benutzername</string>
+    <string name="search_clear">Leeren</string>
+    <string name="search_no_results">Keine Ergebnisse</string>
+    <string name="search_no_accounts_matching">Keine Konten passend zu "%1$s"</string>
+    <string name="search_results_count">%1$d Ergebnis%2$s</string>
+
+    <string name="settings_language">Sprache</string>
+    <string name="settings_language_english">Englisch 🇬🇧</string>
+    <string name="settings_language_german">Deutsch 🇩🇪</string>
+    <string name="settings_language_help">Wähle deine bevorzugte Sprache für Beschriftungen und Inhalte.</string>
+
+    <string name="admin_back">Zurück</string>
+    <string name="admin_panel_title">Admin-Panel</string>
+    <string name="admin_accounts_count">%1$d Konten</string>
+    <string name="admin_search_accounts">Konten durchsuchen</string>
+    <string name="admin_no_matching_accounts">Keine passenden Konten</string>
+    <string name="admin_no_accounts_found">Keine Konten gefunden</string>
+    <string name="admin_new_account">Neues Konto</string>
+    <string name="admin_action_view">Ansehen</string>
+    <string name="admin_action_ban">Sperren</string>
+    <string name="admin_action_disable">Deaktivieren</string>
+    <string name="admin_action_delete">Löschen</string>
+    <string name="admin_account_created">Konto erfolgreich erstellt</string>
+    <string name="admin_creation_failed">Erstellung fehlgeschlagen</string>
+
+    <string name="create_pin_min_length">PIN muss mindestens 6 Zeichen haben</string>
+    <string name="create_pin_mismatch">PINs stimmen nicht überein</string>
+    <string name="create_user_title">Neues Benutzerkonto</string>
+    <string name="create_business_title">Neues Geschäftskonto</string>
+    <string name="create_fill_details">Fülle die folgenden Details aus</string>
+    <string name="create_user_label">Benutzer</string>
+    <string name="create_business_label">Unternehmen</string>
+    <string name="create_owner_username">Eigentümer-Benutzername</string>
+    <string name="create_full_name">Vollständiger Name</string>
+    <string name="create_account_type">Account-Typ</string>
+    <string name="create_business_name">Unternehmensname</string>
+    <string name="create_account_pin">Konto-PIN (mind. 6 Zeichen)</string>
+    <string name="create_confirm_pin">PIN bestätigen</string>
+    <string name="create_create">Erstellen</string>
+    <string name="create_cancel">Abbrechen</string>
+
+    <string name="user_profile_admin_panel">Admin-Panel</string>
+    <string name="user_profile_sign_out">Abmelden</string>
+    <string name="user_profile_role">Rolle</string>
+    <string name="account_not_found">Konto nicht gefunden</string>
+    <string name="home_loading">Lädt…</string>
+    <string name="home_error_title">Etwas ist schiefgelaufen</string>
+    <string name="home_try_again">Erneut versuchen</string>
+    <string name="home_no_transactions">Noch keine Transaktionen</string>
+    <string name="home_send">Senden</string>
+    <string name="home_transfer_success">Überweisung erfolgreich!</string>
+    <string name="home_transfer_failed_check_username">Überweisung fehlgeschlagen — Benutzername prüfen</string>
+    <string name="transaction_new_transfer">Neue Überweisung</string>
+    <string name="transaction_from">Von</string>
+    <string name="transaction_transfer_failed">Überweisung fehlgeschlagen</string>
+    <string name="transaction_network_error">Netzwerkfehler</string>
+    <string name="transaction_send_transfer">Überweisung senden</string>
+    <string name="transaction_amount">Betrag</string>
+    <string name="transaction_reference_optional">Verwendungszweck (optional)</string>
+    <string name="common_send">Senden</string>
+    <string name="common_cancel">Abbrechen</string>
+    <string name="chart_not_enough_data">Nicht genügend Daten für das Diagramm</string>
+
 </resources>

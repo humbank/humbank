@@ -33,8 +33,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.admin_back
+import humbank.composeapp.generated.resources.transaction_amount
+import humbank.composeapp.generated.resources.transaction_from
+import humbank.composeapp.generated.resources.transaction_network_error
+import humbank.composeapp.generated.resources.transaction_new_transfer
+import humbank.composeapp.generated.resources.transaction_reference_optional
+import humbank.composeapp.generated.resources.transaction_transfer_failed
 import kotlinx.coroutines.launch
 import org.humbank.ktorclient.icons.imagevectors.Account
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.NetworkClient.NetworkResult
 import org.scrobotic.humbank.data.AllAccount
@@ -63,11 +72,15 @@ fun TransactionInputScreen(
     var description by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
+
+    val failed = stringResource(Res.string.transaction_transfer_failed)
+    val net_err = stringResource(Res.string.transaction_network_error)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("New transfer") },
-                navigationIcon = { IconButton(onClick = onNavigateBack, enabled = !isLoading) { Icon(Close, "Back") } }
+                title = { Text(stringResource(Res.string.transaction_new_transfer)) },
+                navigationIcon = { IconButton(onClick = onNavigateBack, enabled = !isLoading) { Icon(Close, stringResource(Res.string.admin_back)) } }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -84,12 +97,12 @@ fun TransactionInputScreen(
                 ) {
                     Card(colors = CardDefaults.cardColors(containerColor = palette.inputFillUnfocused), modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(12.dp)) {
-                            Text("From", color = palette.subtitle)
+                            Text(stringResource(Res.string.transaction_from), color = palette.subtitle)
                             Text(senderAccount.full_name, color = palette.title, fontWeight = FontWeight.SemiBold)
                         }
                     }
 
-                    StyledField(amount, { amount = it }, "Amount (HMB)", isLoading, palette, KeyboardType.Decimal)
+                    StyledField(amount, { amount = it }, stringResource(Res.string.transaction_amount) + " (HMB)", isLoading, palette, KeyboardType.Decimal)
 
                     OutlinedTextField(
                         value = receiver,
@@ -109,7 +122,7 @@ fun TransactionInputScreen(
                         )
                     )
 
-                    StyledField(description, { description = it }, "Reference", isLoading, palette, null)
+                    StyledField(description, { description = it }, stringResource(Res.string.transaction_reference_optional), isLoading, palette, null)
 
                     Button(
                         onClick = {
@@ -128,10 +141,10 @@ fun TransactionInputScreen(
                                         onTransactionSuccess()
                                         onNavigateBack()
                                     } else {
-                                        snackbarHostState.showSnackbar("Transfer failed")
+                                        snackbarHostState.showSnackbar(failed)
                                     }
                                 } catch (_: Exception) {
-                                    snackbarHostState.showSnackbar("Network error")
+                                    snackbarHostState.showSnackbar(net_err)
                                 } finally {
                                     isLoading = false
                                 }

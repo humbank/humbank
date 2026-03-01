@@ -38,6 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.admin_back
+import humbank.composeapp.generated.resources.create_account_type
+import humbank.composeapp.generated.resources.create_full_name
+import humbank.composeapp.generated.resources.login_username
 import humbank.composeapp.generated.resources.user_transaction
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -80,7 +84,7 @@ fun ProfileScreen(
                     .clip(CircleShape)
                     .background(palette.cardSurface)
             ) {
-                Icon(ArrowBack, contentDescription = "Back", tint = palette.title, modifier = Modifier.size(20.dp))
+                Icon(ArrowBack, contentDescription = stringResource(Res.string.admin_back), tint = palette.title, modifier = Modifier.size(20.dp))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -151,11 +155,11 @@ fun ProfileScreen(
                 tonalElevation = 0.dp
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    ProfileDetailRow("Full name", receiverAccount.full_name, palette)
+                    ProfileDetailRow(stringResource(Res.string.create_full_name), receiverAccount.full_name, palette)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = palette.cardStroke.copy(alpha = 0.4f), thickness = 0.5.dp)
-                    ProfileDetailRow("Username", "@${receiverAccount.username}", palette)
+                    ProfileDetailRow(stringResource(Res.string.login_username), "@${receiverAccount.username}", palette)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = palette.cardStroke.copy(alpha = 0.4f), thickness = 0.5.dp)
-                    ProfileDetailRow("Account type", receiverAccount.role.replaceFirstChar { it.uppercase() }, palette)
+                    ProfileDetailRow(stringResource(Res.string.create_account_type), receiverAccount.role.replaceFirstChar { it.uppercase() }, palette)
                 }
             }
 

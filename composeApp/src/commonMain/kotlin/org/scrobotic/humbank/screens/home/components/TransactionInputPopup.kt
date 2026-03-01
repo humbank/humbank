@@ -30,6 +30,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.common_cancel
+import humbank.composeapp.generated.resources.common_send
+import humbank.composeapp.generated.resources.transaction_amount
+import humbank.composeapp.generated.resources.transaction_reference_optional
+import org.jetbrains.compose.resources.stringResource
 import org.humbank.ktorclient.icons.imagevectors.Account
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.formatCurrency
@@ -132,7 +138,7 @@ fun TransactionInputPopup(
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Amount") },
+                    label = { Text(stringResource(Res.string.transaction_amount)) },
                     prefix = { Text("HMB ", color = palette.muted, fontSize = 14.sp) },
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
@@ -174,7 +180,7 @@ fun TransactionInputPopup(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Reference (optional)") },
+                    label = { Text(stringResource(Res.string.transaction_reference_optional)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
@@ -202,7 +208,7 @@ fun TransactionInputPopup(
                         color = palette.primaryButtonText
                     )
                 } else {
-                    Text("Send", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(Res.string.common_send), fontWeight = FontWeight.SemiBold)
                 }
             }
         },
@@ -212,7 +218,7 @@ fun TransactionInputPopup(
                 enabled = !isLoading,
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Cancel", color = palette.muted)
+                Text(stringResource(Res.string.common_cancel), color = palette.muted)
             }
         }
     )

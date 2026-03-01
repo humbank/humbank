@@ -35,6 +35,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.create_account_pin
+import humbank.composeapp.generated.resources.create_business_label
+import humbank.composeapp.generated.resources.create_business_name
+import humbank.composeapp.generated.resources.create_business_title
+import humbank.composeapp.generated.resources.create_cancel
+import humbank.composeapp.generated.resources.create_confirm_pin
+import humbank.composeapp.generated.resources.create_create
+import humbank.composeapp.generated.resources.create_fill_details
+import humbank.composeapp.generated.resources.create_full_name
+import humbank.composeapp.generated.resources.create_owner_username
+import humbank.composeapp.generated.resources.create_pin_min_length
+import humbank.composeapp.generated.resources.create_pin_mismatch
+import humbank.composeapp.generated.resources.create_user_label
+import humbank.composeapp.generated.resources.create_user_title
+import humbank.composeapp.generated.resources.login_username
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.ui.humbankPalette
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,16 +71,19 @@ fun CreateAccountDialog(
     var pinLengthError by remember { mutableStateOf(false) }
     val palette = humbankPalette()
 
+    val pin_min_length = stringResource(Res.string.create_pin_min_length)
+    val pin_mismatch = stringResource(Res.string.create_pin_mismatch)
+
     LaunchedEffect(pin, confirmPin) {
         val errors = mutableListOf<String>()
         if (pin.length < 6) {
             pinLengthError = true
-            errors.add("PIN must be 6+ characters")
+            errors.add(pin_min_length)
         } else {
             pinLengthError = false
         }
         if (pin.isNotEmpty() && confirmPin.isNotEmpty() && pin != confirmPin) {
-            errors.add("PINs do not match")
+            errors.add(pin_mismatch)
         }
         pinError = errors.joinToString(", ")
     }
@@ -88,14 +108,14 @@ fun CreateAccountDialog(
         title = {
             Column {
                 Text(
-                    if (isCreatingUser) "New User Account" else "New Business Account",
+                    if (isCreatingUser) stringResource(Res.string.create_user_title) else stringResource(Res.string.create_business_title),
                     fontWeight = FontWeight.Bold,
                     color = palette.title,
                     fontSize = 20.sp,
                     letterSpacing = (-0.3).sp
                 )
                 Text(
-                    "Fill in the details below",
+                    stringResource(Res.string.create_fill_details),
                     color = palette.muted,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Normal
@@ -114,14 +134,14 @@ fun CreateAccountDialog(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     AccountTypeChip(
-                        label = "User",
+                        label = stringResource(Res.string.create_user_label),
                         selected = isCreatingUser,
                         onClick = { if (!isCreatingUser) onToggleType() },
                         modifier = Modifier.weight(1f),
                         palette = palette
                     )
                     AccountTypeChip(
-                        label = "Business",
+                        label = stringResource(Res.string.create_business_label),
                         selected = !isCreatingUser,
                         onClick = { if (isCreatingUser) onToggleType() },
                         modifier = Modifier.weight(1f),
@@ -132,7 +152,7 @@ fun CreateAccountDialog(
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text(if (isCreatingUser) "Username" else "Owner Username") },
+                    label = { Text(if (isCreatingUser) stringResource(Res.string.login_username) else stringResource(Res.string.create_owner_username)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
@@ -142,7 +162,7 @@ fun CreateAccountDialog(
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = { Text(if (isCreatingUser) "Full Name" else "Business Name") },
+                    label = { Text(if (isCreatingUser) stringResource(Res.string.create_full_name) else stringResource(Res.string.create_business_name)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
@@ -152,7 +172,7 @@ fun CreateAccountDialog(
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { pin = it },
-                    label = { Text("Account PIN (6+ characters)") },
+                    label = { Text(stringResource(Res.string.create_account_pin)) },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
@@ -169,14 +189,14 @@ fun CreateAccountDialog(
                 OutlinedTextField(
                     value = confirmPin,
                     onValueChange = { confirmPin = it },
-                    label = { Text("Confirm PIN") },
+                    label = { Text(stringResource(Res.string.create_confirm_pin)) },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
                     isError = pinError.isNotEmpty() && confirmPin.isNotEmpty(),
                     supportingText = {
                         if (pinError.isNotEmpty() && confirmPin.isNotEmpty() && pin != confirmPin) {
-                            Text("PINs do not match", color = palette.dangerButton, fontSize = 11.sp)
+                            Text(stringResource(Res.string.create_pin_mismatch), color = palette.dangerButton, fontSize = 11.sp)
                         }
                     },
                     shape = RoundedCornerShape(14.dp),
@@ -202,7 +222,7 @@ fun CreateAccountDialog(
                 modifier = Modifier.size(height = 46.dp, width = 100.dp)
             ) {
                 if (isLoading) CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = palette.primaryButtonText)
-                else Text("Create", fontWeight = FontWeight.SemiBold)
+                else Text(stringResource(Res.string.create_create), fontWeight = FontWeight.SemiBold)
             }
         },
         dismissButton = {
@@ -210,7 +230,7 @@ fun CreateAccountDialog(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Cancel", color = palette.muted)
+                Text(stringResource(Res.string.create_cancel), color = palette.muted)
             }
         }
     )

@@ -21,6 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.settings_language
+import humbank.composeapp.generated.resources.settings_language_english
+import humbank.composeapp.generated.resources.settings_language_german
+import humbank.composeapp.generated.resources.settings_language_help
+import humbank.composeapp.generated.resources.settings_title
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.HumbankPanelCard
@@ -46,12 +53,12 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                Text("Settings", color = palette.title)
-                Text("Language", color = palette.subtitle)
+                Text(stringResource(Res.string.settings_title), color = palette.title)
+                Text(stringResource(Res.string.settings_language), color = palette.subtitle)
 
                 Box {
                     OutlinedButton(onClick = { expanded = true }) {
-                        Text(if (language == Language.English) "English 🇬🇧" else "Deutsch 🇩🇪")
+                        Text(if (language == Language.English) stringResource(Res.string.settings_language_english) else stringResource(Res.string.settings_language_german))
                         androidx.compose.material3.Icon(ArrowDropDown, contentDescription = null)
                     }
 
@@ -60,14 +67,14 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("English 🇬🇧") },
+                            text = { Text(stringResource(Res.string.settings_language_english)) },
                             onClick = {
                                 onLanguageChange(Language.English)
                                 expanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Deutsch 🇩🇪") },
+                            text = { Text(stringResource(Res.string.settings_language_german)) },
                             onClick = {
                                 onLanguageChange(Language.German)
                                 expanded = false
@@ -78,7 +85,7 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
 
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Choose your preferred language for labels and content.",
+                    text = stringResource(Res.string.settings_language_help),
                     color = palette.muted
                 )
             }

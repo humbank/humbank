@@ -30,6 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.chart_not_enough_data
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.Transaction
 import org.scrobotic.humbank.ui.humbankPalette
 import kotlin.math.min
@@ -80,7 +83,7 @@ fun BalanceLineChart(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Not enough data to display chart",
+                    text = stringResource(Res.string.chart_not_enough_data),
                     color = palette.muted,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium

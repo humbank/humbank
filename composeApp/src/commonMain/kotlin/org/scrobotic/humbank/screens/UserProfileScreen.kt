@@ -33,6 +33,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.account_not_found
+import humbank.composeapp.generated.resources.admin_back
+import humbank.composeapp.generated.resources.admin_panel_title
+import humbank.composeapp.generated.resources.create_full_name
+import humbank.composeapp.generated.resources.login_username
+import humbank.composeapp.generated.resources.user_profile_role
+import humbank.composeapp.generated.resources.user_profile_sign_out
+import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.ui.HumbankGradientScreen
@@ -65,7 +74,7 @@ fun UserProfileScreen(
                     .clip(CircleShape)
                     .background(palette.cardSurface)
             ) {
-                Icon(ArrowBack, contentDescription = "Back", tint = palette.title, modifier = Modifier.size(20.dp))
+                Icon(ArrowBack, contentDescription = stringResource(Res.string.admin_back), tint = palette.title, modifier = Modifier.size(20.dp))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -138,11 +147,11 @@ fun UserProfileScreen(
                     tonalElevation = 0.dp
                 ) {
                     Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                        ProfileInfoRow("Full name", account.full_name, palette)
+                        ProfileInfoRow(stringResource(Res.string.create_full_name), account.full_name, palette)
                         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = palette.cardStroke.copy(alpha = 0.4f), thickness = 0.5.dp)
-                        ProfileInfoRow("Username", "@${account.username}", palette)
+                        ProfileInfoRow(stringResource(Res.string.login_username), "@${account.username}", palette)
                         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = palette.cardStroke.copy(alpha = 0.4f), thickness = 0.5.dp)
-                        ProfileInfoRow("Role", account.role.replaceFirstChar { it.uppercase() }, palette)
+                        ProfileInfoRow(stringResource(Res.string.user_profile_role), account.role.replaceFirstChar { it.uppercase() }, palette)
                     }
                 }
 
@@ -163,7 +172,7 @@ fun UserProfileScreen(
                                 contentColor = palette.primaryButtonText
                             )
                         ) {
-                            Text("Admin Panel", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                            Text(stringResource(Res.string.admin_panel_title), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                         }
                     }
 
@@ -176,7 +185,7 @@ fun UserProfileScreen(
                             contentColor = palette.errorText
                         )
                     ) {
-                        Text("Sign out", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                        Text(stringResource(Res.string.user_profile_sign_out), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                     }
                 }
             } else {
@@ -185,7 +194,7 @@ fun UserProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Account not found",
+                        text = stringResource(Res.string.account_not_found),
                         color = palette.errorText,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium

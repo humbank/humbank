@@ -19,4 +19,80 @@
     <string name="close_btn">Close</string>
     <string name="search_placeholder">Search usernames or names...</string>
     <string name="user_transaction">Send Money</string>
+
+    <string name="retry">Retry</string>
+    <string name="loading_panel">Loading panel…</string>
+    <string name="unknown_error">Unknown error</string>
+
+    <string name="login_welcome_back">Welcome back</string>
+    <string name="login_sign_in_account">Sign in to your account</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_failed">Login failed. Please try again.</string>
+    <string name="login_sign_in">Sign in</string>
+
+    <string name="search_title">Search</string>
+    <string name="search_subtitle">Find accounts by name or username</string>
+    <string name="search_clear">Clear</string>
+    <string name="search_no_results">No results</string>
+    <string name="search_no_accounts_matching">No accounts matching "%1$s"</string>
+    <string name="search_results_count">%1$d result%2$s</string>
+
+    <string name="settings_language">Language</string>
+    <string name="settings_language_english">English 🇬🇧</string>
+    <string name="settings_language_german">Deutsch 🇩🇪</string>
+    <string name="settings_language_help">Choose your preferred language for labels and content.</string>
+
+    <string name="admin_back">Back</string>
+    <string name="admin_panel_title">Admin Panel</string>
+    <string name="admin_accounts_count">%1$d accounts</string>
+    <string name="admin_search_accounts">Search accounts</string>
+    <string name="admin_no_matching_accounts">No matching accounts</string>
+    <string name="admin_no_accounts_found">No accounts found</string>
+    <string name="admin_new_account">New Account</string>
+    <string name="admin_action_view">View</string>
+    <string name="admin_action_ban">Ban</string>
+    <string name="admin_action_disable">Disable</string>
+    <string name="admin_action_delete">Delete</string>
+    <string name="admin_account_created">Account created successfully</string>
+    <string name="admin_creation_failed">Creation failed</string>
+
+    <string name="create_pin_min_length">PIN must be 6+ characters</string>
+    <string name="create_pin_mismatch">PINs do not match</string>
+    <string name="create_user_title">New User Account</string>
+    <string name="create_business_title">New Business Account</string>
+    <string name="create_fill_details">Fill in the details below</string>
+    <string name="create_user_label">User</string>
+    <string name="create_business_label">Business</string>
+    <string name="create_owner_username">Owner Username</string>
+    <string name="create_full_name">Full Name</string>
+    <string name="create_account_type">Account Type</string>
+    <string name="create_business_name">Business Name</string>
+    <string name="create_account_pin">Account PIN (6+ characters)</string>
+    <string name="create_confirm_pin">Confirm PIN</string>
+    <string name="create_create">Create</string>
+    <string name="create_cancel">Cancel</string>
+
+    <string name="user_profile_admin_panel">Admin Panel</string>
+    <string name="user_profile_sign_out">Sign out</string>
+    <string name="user_profile_role">Role</string>
+    <string name="account_not_found">Account not found</string>
+    <string name="home_loading">Loading…</string>
+    <string name="home_error_title">Something went wrong</string>
+    <string name="home_try_again">Try again</string>
+    <string name="home_no_transactions">No transactions yet</string>
+    <string name="home_send">Send</string>
+    <string name="home_transfer_success">Transfer successful!</string>
+    <string name="home_transfer_failed_check_username">Transfer failed — check the recipient username</string>
+    <string name="transaction_new_transfer">New transfer</string>
+    <string name="transaction_from">From</string>
+    <string name="transaction_transfer_failed">Transfer failed</string>
+    <string name="transaction_network_error">Network error</string>
+    <string name="transaction_send_transfer">Send transfer</string>
+    <string name="transaction_amount">Amount</string>
+    <string name="transaction_reference_optional">Reference (optional)</string>
+    <string name="common_send">Send</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="chart_not_enough_data">Not enough data to display chart</string>
+
 </resources>

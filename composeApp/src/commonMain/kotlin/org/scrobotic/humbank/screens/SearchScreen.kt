@@ -43,7 +43,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.search_clear
+import humbank.composeapp.generated.resources.search_no_accounts_matching
+import humbank.composeapp.generated.resources.search_no_results
 import humbank.composeapp.generated.resources.search_placeholder
+import humbank.composeapp.generated.resources.search_results_count
+import humbank.composeapp.generated.resources.search_subtitle
+import humbank.composeapp.generated.resources.search_title
 import org.humbank.ktorclient.icons.imagevectors.Account
 import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.AccountRepository
@@ -77,7 +83,7 @@ fun SearchScreen(
                 Spacer(modifier = Modifier.statusBarsPadding())
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Search",
+                    text = stringResource(Res.string.search_title),
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = palette.title,
@@ -85,7 +91,7 @@ fun SearchScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "Find accounts by name or username",
+                    text = stringResource(Res.string.search_subtitle),
                     color = palette.muted,
                     fontSize = 14.sp
                 )
@@ -104,7 +110,7 @@ fun SearchScreen(
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = { query = "" }) {
-                                Icon(Close, contentDescription = "Clear", tint = palette.muted, modifier = Modifier.size(18.dp))
+                                Icon(Close, contentDescription = stringResource(Res.string.search_clear), tint = palette.muted, modifier = Modifier.size(18.dp))
                             }
                         }
                     },
@@ -132,9 +138,9 @@ fun SearchScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("No results", color = palette.title, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                            Text(stringResource(Res.string.search_no_results), color = palette.title, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("No accounts matching \"$query\"", color = palette.muted, fontSize = 13.sp)
+                            Text(stringResource(Res.string.search_no_accounts_matching, query), color = palette.muted, fontSize = 13.sp)
                         }
                     }
                 }
@@ -145,7 +151,7 @@ fun SearchScreen(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "${searchResults.size} result${if (searchResults.size != 1) "s" else ""}",
+                        stringResource(Res.string.search_results_count, searchResults.size, if (searchResults.size != 1) "s" else ""),
                         color = palette.muted,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,

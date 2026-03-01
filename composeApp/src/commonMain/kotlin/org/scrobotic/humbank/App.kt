@@ -20,7 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.burnoo.compose.remembersetting.rememberStringSetting
+import humbank.composeapp.generated.resources.Res
+import humbank.composeapp.generated.resources.loading_panel
+import humbank.composeapp.generated.resources.retry
+import humbank.composeapp.generated.resources.unknown_error
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.scrobotic.humbank.NetworkClient.ApiRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepositoryImpl
@@ -229,7 +234,7 @@ fun App(navigator: Navigator, database: Database) {
                                         strokeWidth = 2.5.dp
                                     )
                                     Text(
-                                        "Loading panel…",
+                                        stringResource(Res.string.loading_panel),
                                         color = palette.muted,
                                         fontSize = 14.sp
                                     )
@@ -245,7 +250,7 @@ fun App(navigator: Navigator, database: Database) {
                                     verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     Text(
-                                        text = error ?: "Unknown error",
+                                        text = error ?: stringResource(Res.string.unknown_error),
                                         color = palette.errorText,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Medium
@@ -262,7 +267,7 @@ fun App(navigator: Navigator, database: Database) {
                                             contentColor = palette.primaryButtonText
                                         )
                                     ) {
-                                        Text("Retry")
+                                        Text(stringResource(Res.string.retry))
                                     }
                                 }
                             }
