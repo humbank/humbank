@@ -32,13 +32,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.HumbankPanelCard
-import org.scrobotic.humbank.ui.humbankPalette
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Unit, onBack: () -> Unit) {
-    val palette = humbankPalette()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,27 +67,27 @@ fun ProfileScreen(receiverAccount: AllAccount, onTransaction: (AllAccount) -> Un
                         modifier = Modifier
                             .size(96.dp)
                             .clip(CircleShape)
-                            .background(palette.inputBorderUnfocused),
+                            .background(Color(0xFF4B3D72)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = receiverAccount.full_name.firstOrNull()?.toString() ?: "?",
-                            color = palette.title,
+                            color = Color.White,
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Text(receiverAccount.full_name, style = MaterialTheme.typography.titleLarge, color = palette.title)
-                    Text("@${receiverAccount.username}", style = MaterialTheme.typography.bodyMedium, color = palette.subtitle)
+                    Text(receiverAccount.full_name, style = MaterialTheme.typography.titleLarge, color = Color.White)
+                    Text("@${receiverAccount.username}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFAFA6D4))
 
                     Button(
                         onClick = { onTransaction(receiverAccount) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = palette.primaryButton,
-                            contentColor = palette.primaryButtonText
+                            containerColor = Color(0xFFECE4FF),
+                            contentColor = Color(0xFF28194A)
                         )
                     ) {
                         Text(stringResource(Res.string.user_transaction), fontWeight = FontWeight.SemiBold)

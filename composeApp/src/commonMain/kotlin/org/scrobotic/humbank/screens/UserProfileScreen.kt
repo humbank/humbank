@@ -31,7 +31,6 @@ import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.HumbankPanelCard
-import org.scrobotic.humbank.ui.humbankPalette
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,25 +74,25 @@ fun UserProfileScreen(
                             modifier = Modifier
                                 .size(96.dp)
                                 .clip(CircleShape)
-                                .background(palette.inputBorderUnfocused),
+                                .background(Color(0xFF4B3D72)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = account.full_name.firstOrNull()?.toString() ?: "?",
-                                color = palette.title,
+                                color = Color.White,
                                 fontSize = 30.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
 
-                        Text(text = account.full_name, style = MaterialTheme.typography.titleLarge, color = palette.title)
-                        Text(text = "@${account.username}", style = MaterialTheme.typography.bodyMedium, color = palette.subtitle)
+                        Text(text = account.full_name, style = MaterialTheme.typography.titleLarge, color = Color.White)
+                        Text(text = "@${account.username}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFAFA6D4))
 
                         Button(
                             onClick = onLogout,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = palette.dangerButton, contentColor = palette.dangerButtonText)
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF375D), contentColor = Color.White)
                         ) {
                             Text("Logout", fontWeight = FontWeight.SemiBold)
                         }
@@ -104,8 +103,8 @@ fun UserProfileScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = palette.primaryButton,
-                                    contentColor = palette.primaryButtonText
+                                    containerColor = Color(0xFFECE4FF),
+                                    contentColor = Color(0xFF28194A)
                                 )
                             ) {
                                 Text("Admin Panel", fontWeight = FontWeight.SemiBold)
@@ -116,7 +115,7 @@ fun UserProfileScreen(
                     Text(
                         text = "User not found",
                         style = MaterialTheme.typography.titleMedium,
-                        color = palette.errorText,
+                        color = Color(0xFFFF9FAE),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()

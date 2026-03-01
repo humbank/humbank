@@ -34,7 +34,6 @@ import kotlinx.coroutines.launch
 import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.HumbankPanelCard
-import org.scrobotic.humbank.ui.humbankPalette
 
 @Composable
 fun LoginScreen(
@@ -70,7 +69,7 @@ fun LoginScreen(
                 Text(
                     text = "Welcome back",
                     style = MaterialTheme.typography.labelLarge,
-                    color = palette.subtitle
+                    color = Color(0xFFAFA6D4)
                 )
 
                 Spacer(Modifier.height(4.dp))
@@ -78,7 +77,7 @@ fun LoginScreen(
                 Text(
                     text = "Sign in to Humbank",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = palette.title,
+                    color = Color.White,
                     fontWeight = FontWeight.SemiBold
                 )
 
@@ -93,16 +92,16 @@ fun LoginScreen(
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = palette.title.copy(alpha = 0.06f),
-                        unfocusedContainerColor = palette.title.copy(alpha = 0.03f),
-                        disabledContainerColor = palette.title.copy(alpha = 0.02f),
-                        focusedTextColor = palette.title,
-                        unfocusedTextColor = palette.title,
-                        disabledTextColor = palette.muted,
-                        focusedBorderColor = palette.inputBorderFocused,
-                        unfocusedBorderColor = palette.inputBorderUnfocused,
-                        focusedLabelColor = palette.inputBorderFocused,
-                        unfocusedLabelColor = palette.subtitle
+                        focusedContainerColor = Color.White.copy(alpha = 0.06f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
+                        disabledContainerColor = Color.White.copy(alpha = 0.02f),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        disabledTextColor = Color(0xFFBBB4DD),
+                        focusedBorderColor = Color(0xFFD6C7FF),
+                        unfocusedBorderColor = Color(0xFF4D4473),
+                        focusedLabelColor = Color(0xFFDCCFFF),
+                        unfocusedLabelColor = Color(0xFFA89ECF)
                     )
                 )
 
@@ -118,16 +117,16 @@ fun LoginScreen(
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = palette.title.copy(alpha = 0.06f),
-                        unfocusedContainerColor = palette.title.copy(alpha = 0.03f),
-                        disabledContainerColor = palette.title.copy(alpha = 0.02f),
-                        focusedTextColor = palette.title,
-                        unfocusedTextColor = palette.title,
-                        disabledTextColor = palette.muted,
-                        focusedBorderColor = palette.inputBorderFocused,
-                        unfocusedBorderColor = palette.inputBorderUnfocused,
-                        focusedLabelColor = palette.inputBorderFocused,
-                        unfocusedLabelColor = palette.subtitle
+                        focusedContainerColor = Color.White.copy(alpha = 0.06f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
+                        disabledContainerColor = Color.White.copy(alpha = 0.02f),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        disabledTextColor = Color(0xFFBBB4DD),
+                        focusedBorderColor = Color(0xFFD6C7FF),
+                        unfocusedBorderColor = Color(0xFF4D4473),
+                        focusedLabelColor = Color(0xFFDCCFFF),
+                        unfocusedLabelColor = Color(0xFFA89ECF)
                     )
                 )
 
@@ -136,11 +135,11 @@ fun LoginScreen(
                 if (error != null) {
                     Text(
                         text = error!!,
-                        color = palette.errorText,
+                        color = Color(0xFFFF9FAE),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(palette.errorBackground)
+                            .background(Color(0xFF5A1C35).copy(alpha = 0.4f))
                             .padding(horizontal = 10.dp, vertical = 8.dp)
                     )
                     Spacer(Modifier.height(10.dp))
@@ -152,10 +151,10 @@ fun LoginScreen(
                         .height(52.dp),
                     enabled = !isLoading,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = palette.primaryButton,
-                        contentColor = palette.primaryButtonText,
-                        disabledContainerColor = palette.inputBorderUnfocused,
-                        disabledContentColor = palette.muted
+                        containerColor = Color(0xFFECE4FF),
+                        contentColor = Color(0xFF28194A),
+                        disabledContainerColor = Color(0xFF948AAE),
+                        disabledContentColor = Color(0xFF433A59)
                     ),
                     shape = RoundedCornerShape(14.dp),
                     onClick = {
@@ -180,7 +179,7 @@ fun LoginScreen(
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
-                            color = palette.primaryButtonText
+                            color = Color(0xFF28194A)
                         )
                     } else {
                         Text(
@@ -195,7 +194,7 @@ fun LoginScreen(
 
                 Text(
                     text = "Secure access to your account and transactions",
-                    color = palette.muted,
+                    color = Color(0xFF9A92BE),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import org.scrobotic.humbank.domain.Language
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.HumbankPanelCard
-import org.scrobotic.humbank.ui.humbankPalette
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDropDown
 
 @Composable
@@ -46,8 +45,8 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                Text("Settings", color = palette.title)
-                Text("Language", color = palette.subtitle)
+                Text("Settings", color = Color.White)
+                Text("Language", color = Color(0xFFAFA6D4))
 
                 Box {
                     OutlinedButton(onClick = { expanded = true }) {
@@ -79,7 +78,7 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Choose your preferred language for labels and content.",
-                    color = palette.muted
+                    color = Color(0xFF9A92BE)
                 )
             }
         }

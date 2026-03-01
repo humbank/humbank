@@ -34,6 +34,7 @@ import org.scrobotic.humbank.ui.elements.icons.processed.Close
 import org.scrobotic.humbank.ui.elements.icons.processed.Search
 import org.scrobotic.humbank.ui.humbankPalette
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     repository: AccountRepository,
@@ -51,54 +52,39 @@ fun SearchScreen(
                 .padding(16.dp)
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp),
+                modifier = Modifier.fillMaxSize().padding(12.dp),
                 contentPadding = PaddingValues(bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 item {
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = { query = it },
+                    SearchBar(
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        placeholder = { Text(stringResource(Res.string.search_placeholder), color = palette.subtitle) },
-                        leadingIcon = { Icon(Search, contentDescription = null, tint = palette.subtitle) },
+                        query = query,
+                        onQueryChange = { query = it },
+                        onSearch = { active = false },
+                        active = active,
+                        onActiveChange = { active = it },
+                        placeholder = { Text(stringResource(Res.string.search_placeholder)) },
+                        leadingIcon = { Icon(Search, contentDescription = null, tint = Color.White) },
                         trailingIcon = {
-                            if (query.isNotEmpty()) {
-                                IconButton(onClick = { query = "" }) {
-                                    Icon(Close, contentDescription = "Clear search", tint = palette.subtitle)
+                            if (active) {
+                                IconButton(onClick = { if (query.isNotEmpty()) query = "" else active = false }) {
+                                    Icon(Close, contentDescription = "Close search")
                                 }
                             }
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = palette.inputFillFocused,
-                            unfocusedContainerColor = palette.inputFillUnfocused,
-                            focusedBorderColor = palette.inputBorderFocused,
-                            unfocusedBorderColor = palette.inputBorderUnfocused,
-                            focusedTextColor = palette.title,
-                            unfocusedTextColor = palette.title
-                        )
-                    )
-                }
-
-                if (query.isNotBlank() && searchResults.isEmpty()) {
-                    item {
-                        Text(
-                            text = "No matching accounts",
-                            color = palette.muted,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
+                        }
+                    ) {}
                 }
 
                 items(searchResults) { account ->
                     ListItem(
-                        headlineContent = { Text(account.full_name, color = palette.title) },
-                        supportingContent = { Text("@${account.username}", color = palette.subtitle) },
+                        headlineContent = { Text(account.full_name, color = Color.White) },
+                        supportingContent = { Text("@${account.username}", color = Color(0xFFAFA6D4)) },
                         leadingContent = { Icon(Account, contentDescription = null, tint = Color(0xFFD6C7FF)) },
-                        modifier = Modifier.clickable { onNavigateToAccount(account.username) }
+                        modifier = Modifier.clickable {
+                            onNavigateToAccount(account.username)
+                            active = false
+                        }
                     )
                 }
             }
