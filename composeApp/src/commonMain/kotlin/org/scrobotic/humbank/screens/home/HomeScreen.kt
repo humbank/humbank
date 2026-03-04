@@ -232,7 +232,6 @@ fun HomeScreen(
                 )
             }
         ) {
-            // Your content
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

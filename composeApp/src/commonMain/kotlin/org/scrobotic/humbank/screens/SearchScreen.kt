@@ -151,7 +151,7 @@ fun SearchScreen(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        stringResource(Res.string.search_results_count, searchResults.size, if (searchResults.size != 1) "s" else ""),
+                        stringResource(Res.string.search_results_count, searchResults.size, if (searchResults.size != 1) "se" else ""),
                         color = palette.muted,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,

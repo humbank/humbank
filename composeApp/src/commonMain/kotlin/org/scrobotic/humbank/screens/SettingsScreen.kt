@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import humbank.composeapp.generated.resources.Res
 import humbank.composeapp.generated.resources.settings_language
@@ -38,6 +43,8 @@ import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDropDown
 fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onBack: () -> Boolean) {
     var expanded by remember { mutableStateOf(false) }
     val palette = humbankPalette()
+    var buttonpressed by remember { mutableStateOf(false) }
+
 
     HumbankGradientScreen {
         HumbankPanelCard(
@@ -59,7 +66,7 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
                 Box {
                     OutlinedButton(onClick = { expanded = true }) {
                         Text(if (language == Language.English) stringResource(Res.string.settings_language_english) else stringResource(Res.string.settings_language_german))
-                        androidx.compose.material3.Icon(ArrowDropDown, contentDescription = null)
+                        Icon(ArrowDropDown, contentDescription = null)
                     }
 
                     DropdownMenu(
@@ -91,4 +98,6 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
             }
         }
     }
+
+
 }

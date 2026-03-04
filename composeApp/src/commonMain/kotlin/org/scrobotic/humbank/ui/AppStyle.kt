@@ -38,7 +38,8 @@ data class HumbankPalette(
     val dangerButtonText: Color,
     val errorText: Color,
     val errorBackground: Color,
-    // Extended palette for richer UI
+
+
     val accentGlow: Color,
     val cardSurface: Color,
     val cardStroke: Color,
