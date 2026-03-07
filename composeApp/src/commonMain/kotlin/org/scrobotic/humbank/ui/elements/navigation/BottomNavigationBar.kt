@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,8 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,7 +38,6 @@ import org.humbank.ktorclient.icons.imagevectors.Home
 import org.scrobotic.humbank.ui.elements.icons.processed.Search
 import org.scrobotic.humbank.ui.elements.icons.processed.Settings
 import org.scrobotic.humbank.ui.humbankPalette
-import androidx.compose.ui.graphics.Color
 
 // Import your actual icon vectors here — adjust to match your icon set
 // These are placeholder references; swap with your real icon imports
@@ -87,25 +86,25 @@ fun BottomNavigationBar(
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 .padding(horizontal = 16.dp, vertical = 10.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(palette.cardSurface)
-        ) {
-            // Top border line
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                palette.cardStroke.copy(alpha = 0f),
-                                palette.cardStroke.copy(alpha = 0.8f),
-                                palette.cardStroke.copy(alpha = 0.8f),
-                                palette.cardStroke.copy(alpha = 0f)
-                            )
+                .background(
+                    verticalGradient(
+                        colors = listOf(
+                            palette.cardSurface.copy(alpha = 0.95f),
+                            palette.cardSurface.copy(alpha = 0.85f)
                         )
                     )
-            )
-
+                )
+                .border(
+                    width = 1.dp,
+                    brush = verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.12f),
+                            Color.White.copy(alpha = 0.02f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                )
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
