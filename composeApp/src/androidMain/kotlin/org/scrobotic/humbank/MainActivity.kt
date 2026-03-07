@@ -4,6 +4,7 @@ import DriverFactory
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -54,20 +55,11 @@ class MainActivity : ComponentActivity() {
             val driverFactory = DriverFactory(context = applicationContext)
             val database = createDatabase(driverFactory)
 
-            var backProgress by remember { mutableStateOf(0f) }
-
-            PredictiveBackHandler(enabled = navigator.canGoBack) { progress ->
-                try {
-                    progress.collect { backEvent ->
-                        backProgress = backEvent.progress
-                    }
-                    backProgress = 0f
-                    navigator.pop()
-                } catch (e: CancellationException) {
-                    backProgress = 0f
-                }
+            BackHandler(enabled = navigator.canGoBack) {
+                navigator.pop()
             }
-            App(navigator = navigator, database = database, backProgress = backProgress)
+
+            App(navigator = navigator, database = database)
         }
     }
 }
