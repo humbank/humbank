@@ -4,24 +4,25 @@ import DriverFactory
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import org.koin.android.ext.koin.androidContext
 import org.scrobotic.humbank.domain.initializeKoin
-import org.scrobotic.humbank.screens.Navigator
-import androidx.activity.compose.BackHandler
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import createDatabase
 import org.koin.core.context.GlobalContext
 import org.scrobotic.humbank.misc.FirstLaunchManager
-import org.scrobotic.humbank.screens.rememberNavigator
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import dev.burnoo.compose.remembersetting.rememberStringSetting
 import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.screens.Screen
+import org.scrobotic.humbank.screens.rememberNavigator
+import kotlin.coroutines.cancellation.CancellationException
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,38 +41,33 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-
             var savedToken by rememberStringSetting("token", "")
             var savedUsername by rememberStringSetting("username", "")
 
-            println("🔍 STARTUP: token='${savedToken}', username='${savedUsername}'")
-            println("🔍 STARTUP: token.isNotEmpty()=${savedToken.isNotEmpty()}, username.isNotEmpty()=${savedUsername.isNotEmpty()}")
-
             val startScreen = if (savedToken.isNotEmpty() && savedUsername.isNotEmpty()) {
-                println("✅ STARTUP: Starting at HOME")
                 Screen.Home(UserSession(token = savedToken, username = savedUsername))
             } else {
-                println("❌ STARTUP: Starting at LOGIN")
                 Screen.Login
             }
 
-            println("🔍 STARTUP: startScreen = $startScreen")
-
             val navigator = rememberNavigator(start = startScreen)
-
-            println("🔍 STARTUP: navigator.current = ${navigator.current}")
-
             val driverFactory = DriverFactory(context = applicationContext)
             val database = createDatabase(driverFactory)
 
-            BackHandler {
-                val handled = navigator.pop()
-                if (!handled) {
-                    // Let Android close the app (root screen)
+            var backProgress by remember { mutableStateOf(0f) }
+
+            PredictiveBackHandler(enabled = navigator.canGoBack) { progress ->
+                try {
+                    progress.collect { backEvent ->
+                        backProgress = backEvent.progress
+                    }
+                    backProgress = 0f
+                    navigator.pop()
+                } catch (e: CancellationException) {
+                    backProgress = 0f
                 }
             }
-
-            App(navigator = navigator, database = database)
+            App(navigator = navigator, database = database, backProgress = backProgress)
         }
     }
 }
