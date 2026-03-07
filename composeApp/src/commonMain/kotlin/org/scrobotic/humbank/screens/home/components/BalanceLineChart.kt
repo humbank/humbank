@@ -2,9 +2,7 @@ package org.scrobotic.humbank.screens.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -184,13 +181,19 @@ fun BalanceLineChart(
                     y += 12.dp.toPx()
                 }
 
-                val dateText = formatDateLabel(balancePoints[index].timestamp)
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = dateText,
-                    style = labelStyle,
-                    topLeft = Offset(x - 12.dp.toPx(), chartHeight + 8.dp.toPx())
-                )
+                val isLast = i == xSteps
+                if (balancePoints.size <= 6 || i == 0 || isLast) {
+                    val dateText = formatDateLabel(balancePoints[index].timestamp)
+                    drawText(
+                        textMeasurer = textMeasurer,
+                        text = dateText,
+                        style = labelStyle,
+                        topLeft = Offset(
+                            if (isLast) x - 24.dp.toPx() else x - 12.dp.toPx(),
+                            chartHeight + 8.dp.toPx()
+                        )
+                    )
+                }
             }
 
             // Calculate points
@@ -209,8 +212,8 @@ fun BalanceLineChart(
                     for (i in 1 until points.size) {
                         val prev = points[i - 1]
                         val curr = points[i]
-                        val cx1 = prev.x + (curr.x - prev.x) * 0.5f
-                        val cx2 = curr.x - (curr.x - prev.x) * 0.5f
+                        val cx1 = prev.x + (curr.x - prev.x) * 0.3f
+                        val cx2 = curr.x - (curr.x - prev.x) * 0.3f
                         cubicTo(cx1, prev.y, cx2, curr.y, curr.x, curr.y)
                     }
                     lineTo(points.last().x, chartHeight)
@@ -237,8 +240,8 @@ fun BalanceLineChart(
                     for (i in 1 until points.size) {
                         val prev = points[i - 1]
                         val curr = points[i]
-                        val cx1 = prev.x + (curr.x - prev.x) * 0.5f
-                        val cx2 = curr.x - (curr.x - prev.x) * 0.5f
+                        val cx1 = prev.x + (curr.x - prev.x) * 0.3f
+                        val cx2 = curr.x - (curr.x - prev.x) * 0.3f
                         cubicTo(cx1, prev.y, cx2, curr.y, curr.x, curr.y)
                     }
                 }

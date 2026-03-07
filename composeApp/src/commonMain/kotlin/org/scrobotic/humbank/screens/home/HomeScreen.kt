@@ -413,7 +413,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
                 BalanceLineChart(
-                    transactions.take(5),
+                    transactionsToShow,
                     accountId = account!!.username,
                     currentBalance = currentBalance
                 )
