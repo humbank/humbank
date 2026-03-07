@@ -38,10 +38,6 @@ import org.humbank.ktorclient.icons.imagevectors.Home
 import org.scrobotic.humbank.ui.elements.icons.processed.Search
 import org.scrobotic.humbank.ui.elements.icons.processed.Settings
 import org.scrobotic.humbank.ui.humbankPalette
-
-// Import your actual icon vectors here — adjust to match your icon set
-// These are placeholder references; swap with your real icon imports
-
 private data class NavItem(
     val label: String,
     val icon: ImageVector,

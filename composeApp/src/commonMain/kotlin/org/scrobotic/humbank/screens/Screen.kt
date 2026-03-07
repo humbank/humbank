@@ -12,7 +12,7 @@ sealed interface Screen {
 
     object Search : Screen
 
-    data class Profile(val receiverAccount: AllAccount) : Screen
+    data class Profile(val receiverAccount: AllAccount, val currentBalance:Double) : Screen
 
     data class TransactionInput(
         val senderAccount: AllAccount,

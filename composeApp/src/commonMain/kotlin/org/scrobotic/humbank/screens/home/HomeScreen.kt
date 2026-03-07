@@ -55,6 +55,7 @@ import org.scrobotic.humbank.screens.home.components.TransactionInputPopup
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import dev.burnoo.compose.remembersetting.rememberDoubleSetting
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
@@ -62,11 +63,13 @@ import kotlin.time.ExperimentalTime
 fun HomeScreen(
     userSession: UserSession,
     contentPadding: PaddingValues,
-    onNavigateToProfile: (String) -> Unit,
     onTokenInvalid: () -> Unit,
     repo: AccountRepository,
     apiRepository: ApiRepository
 ) {
+
+    var currentBalance by rememberDoubleSetting("balance", 0.0)
+
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val palette = humbankPalette()
@@ -75,7 +78,6 @@ fun HomeScreen(
     var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var currentBalance by remember { mutableStateOf(0.0) }
 
     var showTransactionDialog by remember { mutableStateOf(false) }
     var showAllTransactions by remember { mutableStateOf(false) }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -124,10 +123,6 @@ fun App(navigator: Navigator, database: Database) {
                 is Screen.Home -> HomeScreen(
                     userSession = screen.userSession,
                     contentPadding = innerPadding,
-                    onNavigateToProfile = { uname ->
-                        val account = repo.getAccount(uname)
-                        navigator.push(Screen.Profile(receiverAccount = account))
-                    },
                     onTokenInvalid = {
                         token = ""
                         username = ""
@@ -162,8 +157,8 @@ fun App(navigator: Navigator, database: Database) {
 
                 Screen.Search -> SearchScreen(
                     repository = repo,
-                    onNavigateToAccount = { uname ->
-                        navigator.push(Screen.Profile(receiverAccount = repo.getAccount(uname)))
+                    onNavigateToAccount = { uname , balance->
+                        navigator.push(Screen.Profile(receiverAccount = repo.getAccount(uname), currentBalance = balance))
                     },
                     innerPadding = innerPadding
                 )
@@ -171,7 +166,7 @@ fun App(navigator: Navigator, database: Database) {
                 is Screen.Profile -> ProfileScreen(
                     receiverAccount = screen.receiverAccount,
                     senderAccount = userSession?.let { repo.getAccount(it.username) },
-                    currentBalance = 0.0,
+                    currentBalance = screen.currentBalance,
                     apiRepository = apiRepository,
                     onTransactionSuccess = { navigator.pop() },
                     onBack = { navigator.pop() }

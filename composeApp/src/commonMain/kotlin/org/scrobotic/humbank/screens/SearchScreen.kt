@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.burnoo.compose.remembersetting.rememberDoubleSetting
 import humbank.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.AccountRepository
@@ -40,13 +41,15 @@ fun SearchScreenPreview() {
         Accounts("admin", "admin", "System Admin", "2023-10-01")
     )
 
+
+
     // 2. Call the Content-only version
     SearchScreenContent(
         query = "John",
         onQueryChange = {},
         searchResults = mockResults,
         innerPadding = PaddingValues(0.dp),
-        onNavigateToAccount = {}
+        onNavigateToAccount = {} as (account: String, balance: Double) -> Unit
     )
 }
 
@@ -54,11 +57,12 @@ fun SearchScreenPreview() {
 fun SearchScreen(
     repository: AccountRepository,
     innerPadding: PaddingValues,
-    onNavigateToAccount: (account: String) -> Unit
+    onNavigateToAccount: (account: String, balance: Double) -> Unit
 ) {
     // This remains the entry point for your app
     var query by remember { mutableStateOf("") }
     val searchResults by repository.searchAccounts(query).collectAsState(initial = emptyList())
+
 
     SearchScreenContent(
         query = query,
@@ -75,9 +79,10 @@ fun SearchScreenContent(
     onQueryChange: (String) -> Unit,
     searchResults: List<Accounts>,
     innerPadding: PaddingValues,
-    onNavigateToAccount: (account: String) -> Unit
+    onNavigateToAccount: (account: String, balance: Double) -> Unit
 ) {
     val palette = humbankPalette()
+    val balance by rememberDoubleSetting("balance", 0.0)
 
     HumbankGradientScreen {
         LazyColumn(
@@ -179,7 +184,7 @@ fun SearchScreenContent(
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { onNavigateToAccount(account.username) },
+                        ) { onNavigateToAccount(account.username, balance) },
                     shape = RoundedCornerShape(18.dp),
                     color = palette.cardSurface,
                     border = BorderStroke(
