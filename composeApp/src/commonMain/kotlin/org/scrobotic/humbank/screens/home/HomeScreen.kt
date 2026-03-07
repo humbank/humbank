@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -47,7 +46,6 @@ import org.scrobotic.humbank.screens.home.components.TransactionRow
 import org.scrobotic.humbank.ui.elements.icons.processed.Send
 import org.scrobotic.humbank.AccountRepository
 import org.scrobotic.humbank.NetworkClient.ApiRepository
-import org.scrobotic.humbank.NetworkClient.NetworkResult
 import org.scrobotic.humbank.data.AllAccount
 import org.scrobotic.humbank.data.UserSession
 import org.scrobotic.humbank.data.generateRandomId

@@ -28,7 +28,6 @@ import org.scrobotic.humbank.AccountRepository
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.elements.icons.processed.Close
 import org.scrobotic.humbank.ui.elements.icons.processed.Search
-import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
 import org.scrobotic.humbank.ui.humbankPalette
 import orgscrobotichumbank.Accounts
 
