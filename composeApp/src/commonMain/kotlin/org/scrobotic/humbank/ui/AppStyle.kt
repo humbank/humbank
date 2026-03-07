@@ -60,7 +60,7 @@ fun humbankPalette(): HumbankPalette {
             panelStroke = Color(0xFF6B5ACD).copy(alpha = 0.25f),
             title = Color(0xFFF0ECFF),
             subtitle = Color(0xFFAA9EDA),
-            muted = Color(0xFF7A6EAA),
+            muted = Color(0xFFC8BAEE),
             inputFillFocused = Color(0xFF241E42),
             inputFillUnfocused = Color(0xFF1C1836),
             inputBorderFocused = Color(0xFF8B7FD4),

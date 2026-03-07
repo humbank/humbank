@@ -85,6 +85,13 @@ android {
     namespace = "org.scrobotic.humbank"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    sourceSets {
+        getByName("main") {
+            res.srcDirs("src/androidMain/res")
+            manifest.srcFile("src/androidMain/AndroidManifest.xml")
+        }
+    }
+
     defaultConfig {
         applicationId = "org.scrobotic.humbank"
         minSdk = libs.versions.android.minSdk.get().toInt()
