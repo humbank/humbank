@@ -164,7 +164,8 @@ fun App(navigator: Navigator, database: Database) {
                     repository = repo,
                     onNavigateToAccount = { uname ->
                         navigator.push(Screen.Profile(receiverAccount = repo.getAccount(uname)))
-                    }
+                    },
+                    innerPadding = innerPadding
                 )
 
                 is Screen.Profile -> ProfileScreen(

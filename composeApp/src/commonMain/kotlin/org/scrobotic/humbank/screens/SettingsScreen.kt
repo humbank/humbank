@@ -4,17 +4,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,8 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import humbank.composeapp.generated.resources.Res
 import humbank.composeapp.generated.resources.settings_language
@@ -39,6 +37,18 @@ import org.scrobotic.humbank.ui.HumbankPanelCard
 import org.scrobotic.humbank.ui.humbankPalette
 import org.scrobotic.humbank.ui.elements.icons.processed.ArrowDropDown
 
+@Preview
+@Composable
+fun SettingsScreenPreview() {
+    var language by remember { mutableStateOf(Language.English) }
+
+    SettingsScreen(
+        language = language,
+        onLanguageChange = {},
+        onBack = { true }
+    )
+}
+
 @Composable
 fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onBack: () -> Boolean) {
     var expanded by remember { mutableStateOf(false) }
@@ -47,11 +57,12 @@ fun SettingsScreen(language: Language, onLanguageChange: (Language) -> Unit, onB
 
 
     HumbankGradientScreen {
+
         HumbankPanelCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp)
-                .align(Alignment.TopCenter)
+                .align(Alignment.TopCenter).windowInsetsPadding(WindowInsets.displayCutout)
         ) {
             Column(
                 modifier = Modifier

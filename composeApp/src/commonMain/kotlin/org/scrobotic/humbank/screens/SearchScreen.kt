@@ -4,68 +4,80 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import humbank.composeapp.generated.resources.Res
-import humbank.composeapp.generated.resources.search_clear
-import humbank.composeapp.generated.resources.search_no_accounts_matching
-import humbank.composeapp.generated.resources.search_no_results
-import humbank.composeapp.generated.resources.search_placeholder
-import humbank.composeapp.generated.resources.search_results_count
-import humbank.composeapp.generated.resources.search_subtitle
-import humbank.composeapp.generated.resources.search_title
-import org.humbank.ktorclient.icons.imagevectors.Account
+import humbank.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import org.scrobotic.humbank.AccountRepository
 import org.scrobotic.humbank.ui.HumbankGradientScreen
 import org.scrobotic.humbank.ui.elements.icons.processed.Close
 import org.scrobotic.humbank.ui.elements.icons.processed.Search
+import org.scrobotic.humbank.ui.elements.navigation.BottomNavigationBar
 import org.scrobotic.humbank.ui.humbankPalette
+import orgscrobotichumbank.Accounts
+
+@Preview
+@Composable
+fun SearchScreenPreview() {
+    // 1. Use dummy data for the preview
+    val mockResults = listOf(
+        Accounts("jdoe", "user", "John Doe", "2023-10-01"),
+        Accounts("admin", "admin", "System Admin", "2023-10-01")
+    )
+
+    // 2. Call the Content-only version
+    SearchScreenContent(
+        query = "John",
+        onQueryChange = {},
+        searchResults = mockResults,
+        innerPadding = PaddingValues(0.dp),
+        onNavigateToAccount = {}
+    )
+}
 
 @Composable
 fun SearchScreen(
     repository: AccountRepository,
+    innerPadding: PaddingValues,
     onNavigateToAccount: (account: String) -> Unit
 ) {
+    // This remains the entry point for your app
     var query by remember { mutableStateOf("") }
-    val palette = humbankPalette()
     val searchResults by repository.searchAccounts(query).collectAsState(initial = emptyList())
+
+    SearchScreenContent(
+        query = query,
+        onQueryChange = { },
+        searchResults = searchResults,
+        innerPadding = innerPadding,
+        onNavigateToAccount = onNavigateToAccount
+    )
+}
+
+@Composable
+fun SearchScreenContent(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    searchResults: List<Accounts>,
+    innerPadding: PaddingValues,
+    onNavigateToAccount: (account: String) -> Unit
+) {
+    val palette = humbankPalette()
 
     HumbankGradientScreen {
         LazyColumn(
@@ -74,7 +86,7 @@ fun SearchScreen(
                 start = 16.dp,
                 end = 16.dp,
                 top = 0.dp,
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 90.dp
+                bottom = innerPadding.calculateBottomPadding()
             ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -102,14 +114,14 @@ fun SearchScreen(
             item {
                 OutlinedTextField(
                     value = query,
-                    onValueChange = { query = it },
+                    onValueChange = onQueryChange,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     placeholder = { Text(stringResource(Res.string.search_placeholder), color = palette.muted) },
                     leadingIcon = { Icon(Search, contentDescription = null, tint = palette.muted, modifier = Modifier.size(20.dp)) },
                     trailingIcon = {
                         if (query.isNotEmpty()) {
-                            IconButton(onClick = { query = "" }) {
+                            IconButton(onClick = { onQueryChange("") }) {
                                 Icon(Close, contentDescription = stringResource(Res.string.search_clear), tint = palette.muted, modifier = Modifier.size(18.dp))
                             }
                         }
