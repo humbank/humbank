@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,7 @@ import org.humbank.ktorclient.icons.imagevectors.Home
 import org.scrobotic.humbank.ui.elements.icons.processed.Search
 import org.scrobotic.humbank.ui.elements.icons.processed.Settings
 import org.scrobotic.humbank.ui.humbankPalette
+import androidx.compose.ui.graphics.Color
 
 // Import your actual icon vectors here — adjust to match your icon set
 // These are placeholder references; swap with your real icon imports
@@ -67,40 +69,56 @@ fun BottomNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(
+                verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        palette.gradientBottom.copy(alpha = 0.8f),
+                        palette.gradientBottom
+                    )
+                )
+            )
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 16.dp, vertical = 10.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(palette.cardSurface)
     ) {
-        // Top border line
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            palette.cardStroke.copy(alpha = 0f),
-                            palette.cardStroke.copy(alpha = 0.8f),
-                            palette.cardStroke.copy(alpha = 0.8f),
-                            palette.cardStroke.copy(alpha = 0f)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(palette.cardSurface)
+        ) {
+            // Top border line
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                palette.cardStroke.copy(alpha = 0f),
+                                palette.cardStroke.copy(alpha = 0.8f),
+                                palette.cardStroke.copy(alpha = 0.8f),
+                                palette.cardStroke.copy(alpha = 0f)
+                            )
                         )
                     )
-                )
-        )
+            )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            items.forEachIndexed { index, item ->
-                NavBarItem(
-                    item = item,
-                    selected = index == selectedIndex
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items.forEachIndexed { index, item ->
+                    NavBarItem(
+                        item = item,
+                        selected = index == selectedIndex
+                    )
+                }
             }
         }
     }
